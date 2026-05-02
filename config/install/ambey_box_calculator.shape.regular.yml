@@ -1,0 +1,5 @@
+id: regular
+label: 'Regular Box'
+description: 'Standard corrugated shipping box'
+image: '/modules/custom/ambey_box_calculator/ambey_box_calculator/images/regular.png'
+enabled: true

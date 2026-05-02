@@ -1,0 +1,14 @@
+calculator:
+  css:
+    theme:
+      css/ambey-box-calculator.css: {}
+  js:
+    js/ambey-box-calculator.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+admin_quotes:
+  css:
+    theme:
+      css/admin-quotes.css: {}

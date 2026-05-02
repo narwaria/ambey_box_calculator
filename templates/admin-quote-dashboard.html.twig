@@ -1,0 +1,96 @@
+<div class="ambey-admin-quotes">
+  <div class="ambey-admin-header">
+    <div>
+      <h1>Quote Management Dashboard</h1>
+      <p>Track requests, status, priority, ownership, and follow-up activity.</p>
+    </div>
+    <a class="ambey-admin-button ambey-admin-button--outline" href="{{ export_url }}">Export CSV</a>
+  </div>
+
+  <div class="ambey-summary-grid">
+    <div class="ambey-summary-card"><span>Total Quotes</span><strong>{{ summary.total|default(0) }}</strong></div>
+    <div class="ambey-summary-card"><span>New Quotes</span><strong>{{ summary.new|default(0) }}</strong></div>
+    <div class="ambey-summary-card"><span>In Review</span><strong>{{ summary.in_review|default(0) }}</strong></div>
+    <div class="ambey-summary-card"><span>In Progress</span><strong>{{ summary.in_progress|default(0) }}</strong></div>
+    <div class="ambey-summary-card"><span>Quote Sent</span><strong>{{ summary.quote_sent|default(0) }}</strong></div>
+    <div class="ambey-summary-card"><span>Follow Up</span><strong>{{ summary.follow_up|default(0) }}</strong></div>
+    <div class="ambey-summary-card"><span>Converted</span><strong>{{ summary.converted|default(0) }}</strong></div>
+    <div class="ambey-summary-card"><span>Closed</span><strong>{{ (summary.closed|default(0)) + (summary.rejected|default(0)) }}</strong></div>
+  </div>
+
+  <form method="get" class="ambey-filter-bar">
+    <input type="search" name="keyword" value="{{ filters.keyword }}" placeholder="Search name, email, phone, company, quote ID">
+    <input type="text" name="phone" value="{{ filters.phone }}" placeholder="Phone">
+    <input type="text" name="company" value="{{ filters.company }}" placeholder="Company">
+    <input type="text" name="product_type" value="{{ filters.product_type }}" placeholder="Product / service">
+    <select name="status">
+      <option value="">All Status</option>
+      {% for key, label in status_options %}
+        <option value="{{ key }}" {% if filters.status == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="priority">
+      <option value="">All Priorities</option>
+      {% for key, label in priority_options %}
+        <option value="{{ key }}" {% if filters.priority == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="assigned_uid">
+      <option value="">All Assignees</option>
+      {% for key, label in assigned_options %}
+        {% if key %}
+          <option value="{{ key }}" {% if filters.assigned_uid == key %}selected{% endif %}>{{ label }}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+    <input type="date" name="date_from" value="{{ filters.date_from }}">
+    <input type="date" name="date_to" value="{{ filters.date_to }}">
+    <button type="submit" class="ambey-admin-button">Apply Filter</button>
+  </form>
+
+  <div class="ambey-table-wrap">
+    <table class="ambey-quotes-table">
+      <thead>
+        <tr>
+          <th>Quote ID</th>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Company</th>
+          <th>Product / Service</th>
+          <th>Quantity</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Assigned To</th>
+          <th>Created</th>
+          <th>Last Updated</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for quote in quotes %}
+          <tr class="priority-{{ quote.priority.key }}">
+            <td><strong>{{ quote.id }}</strong></td>
+            <td>{{ quote.name }}</td>
+            <td>{{ quote.email }}</td>
+            <td>{{ quote.phone }}</td>
+            <td>{{ quote.company ?: '-' }}</td>
+            <td>{{ quote.product }}</td>
+            <td>{{ quote.quantity }}</td>
+            <td><span class="quote-status quote-status--{{ quote.status.key }}">{{ quote.status.label }}</span></td>
+            <td><span class="quote-priority quote-priority--{{ quote.priority.key }}">{{ quote.priority.label }}</span></td>
+            <td>{{ quote.assigned_to }}</td>
+            <td>{{ quote.date }}</td>
+            <td>{{ quote.changed ?: '-' }}</td>
+            <td class="ambey-row-actions">
+              <a href="{{ quote.view }}">View</a>
+              <a href="{{ quote.download }}">PDF</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="13">No quotes found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

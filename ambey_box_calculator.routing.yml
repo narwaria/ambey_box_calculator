@@ -1,0 +1,127 @@
+ambey_box_calculator.form:
+  path: '/box-calculator'
+  defaults:
+    _form: '\Drupal\ambey_box_calculator\Form\BoxCalculatorForm'
+    _title: 'Box Calculator'
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+
+ambey_box_calculator.confirmation:
+  path: '/quote-confirmation/{quote_id}'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\QuoteConfirmationController::view'
+    _title: 'Quote Confirmation'
+  requirements:
+    _permission: 'access content'
+    quote_id: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+
+ambey_box_calculator.download:
+  path: '/quote-download/{quote_id}'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\QuoteDownloadController::download'
+  requirements:
+    _permission: 'access content'
+    quote_id: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+
+ambey_box_calculator.admin_quotes:
+  path: '/admin/quotes'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\AdminQuoteController::dashboard'
+    _title: 'Quote Management Dashboard'
+  requirements:
+    _permission: 'view quotes'
+  options:
+    _admin_route: TRUE
+
+ambey_box_calculator.admin_quotes_legacy:
+  path: '/admin/ambey/quotes'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\AdminQuoteController::dashboard'
+    _title: 'Quote Management Dashboard'
+  requirements:
+    _permission: 'view quotes'
+  options:
+    _admin_route: TRUE
+
+ambey_box_calculator.admin_quotes_export:
+  path: '/admin/quotes/export'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\AdminQuoteController::export'
+    _title: 'Export Quotes'
+  requirements:
+    _permission: 'export quotes'
+  options:
+    _admin_route: TRUE
+
+ambey_box_calculator.quote_detail:
+  path: '/admin/quotes/{quote_id}'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\AdminQuoteDetailController::view'
+    _title: 'Quote Detail'
+  requirements:
+    _permission: 'view quotes'
+    quote_id: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+  options:
+    _admin_route: TRUE
+
+ambey_box_calculator.quote_detail_legacy:
+  path: '/admin/ambey/quote/{quote_id}'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\AdminQuoteDetailController::view'
+    _title: 'Quote Detail'
+  requirements:
+    _permission: 'view quotes'
+    quote_id: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+  options:
+    _admin_route: TRUE
+
+ambey_box_calculator.crm_settings:
+  path: '/admin/config/ambey/crm'
+  defaults:
+    _form: '\Drupal\ambey_box_calculator\Form\CrmSettingsForm'
+    _title: 'CRM Settings'
+  requirements:
+    _permission: 'manage ambey crm settings'
+
+ambey_box_calculator.logs:
+  path: '/admin/ambey/logs'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\LogController::view'
+    _title: 'Ambey Calculator Logs'
+  requirements:
+    _permission: 'view ambey logs'
+
+ambey_box_calculator.api_calculate:
+  path: '/api/box/calculate'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\ApiController::calculate'
+  methods: [POST]
+  requirements:
+    _permission: 'access content'
+
+ambey_box_calculator.api_create_quote:
+  path: '/api/box/quote'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\ApiController::createQuote'
+  methods: [POST]
+  requirements:
+    _permission: 'access content'
+
+ambey_box_calculator.api_get_quote:
+  path: '/api/box/quote/{id}'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\ApiController::getQuote'
+  methods: [GET]
+  requirements:
+    _permission: 'view ambey quote detail'
+    id: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+
+ambey_box_calculator.api_list_quotes:
+  path: '/api/box/quotes'
+  defaults:
+    _controller: '\Drupal\ambey_box_calculator\Controller\ApiController::listQuotes'
+  methods: [GET]
+  requirements:
+    _permission: 'view ambey quotes'

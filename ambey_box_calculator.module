@@ -1,0 +1,68 @@
+<?php
+
+/**
+ * @file
+ * Hooks for Ambey Box Calculator.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function ambey_box_calculator_theme() {
+  return [
+    'quote_pdf' => [
+      'variables' => [
+        'quote' => [],
+        'logo' => NULL,
+      ],
+      'template' => 'quote-pdf',
+    ],
+    'quote_confirmation' => [
+      'variables' => [
+        'quote' => [],
+      ],
+      'template' => 'quote-confirmation',
+    ],
+    'admin_quote_dashboard' => [
+      'variables' => [
+        'quotes' => [],
+        'summary' => [],
+        'filters' => [],
+        'status_options' => [],
+        'priority_options' => [],
+        'assigned_options' => [],
+        'export_url' => '',
+      ],
+      'template' => 'admin-quote-dashboard',
+    ],
+    'admin_quote_detail' => [
+      'variables' => [
+        'quote' => [],
+        'notes' => [],
+        'audit' => [],
+        'manage_form' => NULL,
+      ],
+      'template' => 'admin-quote-detail',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_mail().
+ */
+function ambey_box_calculator_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'send_quote':
+      $message['subject'] = t('Your Box Quotation');
+      $message['body'][] = t('Please find attached your quotation.');
+
+      if (!empty($params['file'])) {
+        $message['attachments'][] = [
+          'filecontent' => $params['file'],
+          'filename' => 'quotation.pdf',
+          'filemime' => 'application/pdf',
+        ];
+      }
+      break;
+  }
+}

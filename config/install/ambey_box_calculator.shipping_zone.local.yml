@@ -1,0 +1,4 @@
+id: local
+label: 'Local Delivery'
+cost: 2.50
+delivery_days: 2

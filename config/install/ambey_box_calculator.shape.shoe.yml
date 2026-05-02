@@ -1,0 +1,5 @@
+id: shoe
+label: 'Shoe Box'
+description: 'Shoe packaging box'
+image: '/modules/custom/ambey_box_calculator/ambey_box_calculator/images/shoe.png'
+enabled: true

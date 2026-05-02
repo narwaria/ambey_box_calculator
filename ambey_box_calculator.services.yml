@@ -1,0 +1,39 @@
+services:
+  cache.ambey_pricing:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    factory: cache_factory:get
+    arguments: [ambey_pricing]
+
+  logger.channel.ambey_box_calculator:
+    parent: logger.channel_base
+    arguments: ['ambey_box_calculator']
+
+  ambey_box_calculator.pricing:
+    class: Drupal\ambey_box_calculator\PricingCalculator
+    arguments:
+      - '@database'
+      - '@cache.ambey_pricing'
+      - '@entity_type.manager'
+      - '@logger.channel.ambey_box_calculator'
+
+  ambey_box_calculator.rules:
+    class: Drupal\ambey_box_calculator\BusinessRuleValidator
+
+  ambey_box_calculator.quote:
+    class: Drupal\ambey_box_calculator\QuoteStorage
+    arguments:
+      - '@database'
+      - '@uuid'
+
+  ambey_box_calculator.pdf:
+    class: Drupal\ambey_box_calculator\PdfGenerator
+    arguments:
+      - '@renderer'
+      - '@extension.list.module'
+
+  ambey_box_calculator.crm:
+    class: Drupal\ambey_box_calculator\CrmIntegrationService
+    arguments:
+      - '@http_client'
+      - '@config.factory'
+      - '@logger.channel.ambey_box_calculator'

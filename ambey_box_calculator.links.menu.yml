@@ -1,0 +1,37 @@
+ambey_box_calculator.admin_quotes:
+  title: 'Quotes'
+  route_name: ambey_box_calculator.admin_quotes
+  parent: system.admin_content
+  description: 'Manage submitted quote requests.'
+  weight: 20
+
+ambey_box_calculator.admin_quotes_top:
+  title: 'Quote Management'
+  route_name: ambey_box_calculator.admin_quotes
+  parent: system.admin
+  description: 'Manage submitted quote requests.'
+  weight: -5
+
+ambey_pricing.admin:
+  title: 'Box Pricing'
+  route_name: entity.ambey_pricing.collection
+  parent: system.admin_config
+  description: 'Manage box pricing slabs.'
+
+ambey_shape.admin:
+  title: 'Box Shapes'
+  route_name: entity.ambey_shape.collection
+  parent: system.admin_config
+  description: 'Manage box shapes.'
+
+ambey_shipping.admin:
+  title: 'Shipping Zones'
+  route_name: entity.ambey_shipping_zone.collection
+  parent: system.admin_config
+  description: 'Manage shipping zones.'
+
+ambey_crm.admin:
+  title: 'CRM Settings'
+  route_name: ambey_box_calculator.crm_settings
+  parent: system.admin_config
+  description: 'Configure CRM webhook integration.'

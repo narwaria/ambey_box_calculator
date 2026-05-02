@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #333; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .logo { height: 60px; }
+    .title { font-size: 22px; font-weight: bold; margin-top: 10px; }
+    .section { margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { border: 1px solid #ddd; padding: 8px; }
+    .total { font-weight: bold; font-size: 15px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    {% if logo %}<img src="{{ logo }}" class="logo" alt="Logo">{% endif %}
+    <div class="title">Box Quotation</div>
+  </div>
+  <div class="section">
+    <h3>Customer Details</h3>
+    <table>
+      <tr><td>Name</td><td>{{ quote.name }}</td></tr>
+      <tr><td>Email</td><td>{{ quote.email }}</td></tr>
+      <tr><td>Phone</td><td>{{ quote.phone }}</td></tr>
+    </table>
+  </div>
+  <div class="section">
+    <h3>Box Details</h3>
+    <table>
+      <tr><td>Shape</td><td>{{ quote.shape }}</td></tr>
+      <tr><td>Board Grade</td><td>{{ quote.board_grade }}</td></tr>
+      <tr><td>Size</td><td>{{ quote.length }} × {{ quote.width }} × {{ quote.height }} inches</td></tr>
+      <tr><td>Colour</td><td>{{ quote.color }}</td></tr>
+      <tr><td>Print</td><td>{{ quote.print_type }}</td></tr>
+      <tr><td>Coating</td><td>{{ quote.coating ?: 'None' }}</td></tr>
+      <tr><td>Shipping Zone</td><td>{{ quote.shipping_zone }}</td></tr>
+      <tr><td>Quantity</td><td>{{ quote.quantity }}</td></tr>
+    </table>
+  </div>
+  <div class="section">
+    <h3>Pricing</h3>
+    <table>
+      <tr><td>Box Price Without GST</td><td>₹{{ quote.base_price }}</td></tr>
+      <tr><td>GST (12%) Per Box</td><td>₹{{ quote.gst }}</td></tr>
+      <tr><td>Final Price Per Box</td><td>₹{{ quote.final_price }}</td></tr>
+      <tr><td>Total Without GST</td><td>₹{{ quote.total_without_gst }}</td></tr>
+      <tr class="total"><td>Total With GST</td><td>₹{{ quote.total_with_gst }}</td></tr>
+    </table>
+  </div>
+</body>
+</html>

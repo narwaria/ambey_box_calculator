@@ -1,0 +1,36 @@
+view ambey quotes:
+  title: 'View box quotes'
+  description: 'Allows viewing quote list.'
+view ambey quote detail:
+  title: 'View quote detail'
+  description: 'Allows viewing full quote details and downloading quote PDFs.'
+administer quotes:
+  title: 'Administer quotes'
+  description: 'Full access to manage quote requests.'
+view quotes:
+  title: 'View quotes'
+  description: 'View quote requests.'
+edit quotes:
+  title: 'Edit quotes'
+  description: 'Edit quote status, priority, assignment, and notes.'
+delete quotes:
+  title: 'Delete quotes'
+  description: 'Delete quote requests.'
+export quotes:
+  title: 'Export quotes'
+  description: 'Export quote request data.'
+manage ambey pricing:
+  title: 'Manage pricing slabs'
+  description: 'Allows managing pricing rules.'
+manage ambey shapes:
+  title: 'Manage shapes'
+  description: 'Allows managing box shapes.'
+manage ambey shipping:
+  title: 'Manage shipping zones'
+  description: 'Allows managing shipping zones.'
+manage ambey crm settings:
+  title: 'Manage CRM settings'
+  description: 'Allows configuring CRM integration.'
+view ambey logs:
+  title: 'View Ambey calculator logs'
+  description: 'Allows viewing calculator related logs.'

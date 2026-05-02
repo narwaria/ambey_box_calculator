@@ -1,0 +1,90 @@
+<div class="ambey-admin-quotes ambey-quote-detail">
+  <div class="ambey-admin-header">
+    <div>
+      <h1>Quote {{ quote.uuid }}</h1>
+      <p>{{ quote.name }} · {{ quote.email }} · {{ quote.created_label }}</p>
+    </div>
+    <a class="ambey-admin-button ambey-admin-button--outline" href="/quote-download/{{ quote.uuid }}">Download PDF</a>
+  </div>
+
+  <div class="ambey-detail-grid">
+    <section class="ambey-detail-section">
+      <h2>Customer Details</h2>
+      <dl>
+        <dt>Name</dt><dd>{{ quote.name }}</dd>
+        <dt>Email</dt><dd>{{ quote.email }}</dd>
+        <dt>Phone</dt><dd>{{ quote.phone }}</dd>
+        <dt>Company</dt><dd>{{ quote.company ?: '-' }}</dd>
+      </dl>
+    </section>
+
+    <section class="ambey-detail-section">
+      <h2>Quote Requirement</h2>
+      <dl>
+        <dt>Product / Service</dt><dd>{{ quote.product_type ?: quote.shape }}</dd>
+        <dt>Quantity</dt><dd>{{ quote.quantity }}</dd>
+        <dt>Material</dt><dd>{{ quote.board_grade }}</dd>
+        <dt>Size</dt><dd>{{ quote.length }} × {{ quote.width }} × {{ quote.height }} inches</dd>
+        <dt>Color</dt><dd>{{ quote.color }}</dd>
+        <dt>Print</dt><dd>{{ quote.print_type }}</dd>
+        <dt>Coating</dt><dd>{{ quote.coating ?: 'None' }}</dd>
+        <dt>Description</dt><dd>{{ quote.description ?: '-' }}</dd>
+      </dl>
+    </section>
+
+    <section class="ambey-detail-section">
+      <h2>Status Information</h2>
+      <dl>
+        <dt>Status</dt><dd><span class="quote-status quote-status--{{ quote.status }}">{{ quote.status_label }}</span></dd>
+        <dt>Priority</dt><dd><span class="quote-priority quote-priority--{{ quote.priority }}">{{ quote.priority_label }}</span></dd>
+        <dt>Assigned To</dt><dd>{{ quote.assigned_to_label }}</dd>
+        <dt>Created</dt><dd>{{ quote.created_label }}</dd>
+        <dt>Last Updated</dt><dd>{{ quote.changed_label ?: '-' }}</dd>
+      </dl>
+    </section>
+
+    <section class="ambey-detail-section ambey-manage-panel">
+      <h2>Manage Quote</h2>
+      {% if manage_form %}
+        {{ manage_form }}
+      {% else %}
+        <p>You have view-only access for this quote.</p>
+      {% endif %}
+    </section>
+
+    <section class="ambey-detail-section">
+      <h2>Pricing</h2>
+      <dl>
+        <dt>Box Price Without GST</dt><dd>₹{{ quote.base_price }}</dd>
+        <dt>GST</dt><dd>₹{{ quote.gst }}</dd>
+        <dt>Final Price Per Box</dt><dd>₹{{ quote.final_price }}</dd>
+        <dt>Total Without GST</dt><dd>₹{{ quote.total_without_gst }}</dd>
+        <dt>Total With GST</dt><dd>₹{{ quote.total_with_gst }}</dd>
+      </dl>
+    </section>
+
+    <section class="ambey-detail-section">
+      <h2>Admin Notes</h2>
+      {% for note in notes %}
+        <article class="ambey-note">
+          <p>{{ note.note }}</p>
+          <small>{{ note.user_label }} · {{ note.created_label }}</small>
+        </article>
+      {% else %}
+        <p>No internal notes yet.</p>
+      {% endfor %}
+    </section>
+
+    <section class="ambey-detail-section ambey-timeline">
+      <h2>Timeline</h2>
+      {% for item in audit %}
+        <article>
+          <strong>{{ item.message }}</strong>
+          <span>{{ item.user_label }} · {{ item.created_label }}</span>
+        </article>
+      {% else %}
+        <p>No activity recorded yet.</p>
+      {% endfor %}
+    </section>
+  </div>
+</div>

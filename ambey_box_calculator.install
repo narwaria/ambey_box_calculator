@@ -1,0 +1,302 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall hooks for Ambey Box Calculator.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function ambey_box_calculator_schema() {
+  $schema['ambey_box_pricing'] = [
+    'description' => 'Pricing slabs for box calculator.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'not null' => TRUE],
+      'shape' => ['type' => 'varchar', 'length' => 50, 'not null' => TRUE],
+      'board_grade' => ['type' => 'varchar', 'length' => 50, 'not null' => TRUE],
+      'quantity_from' => ['type' => 'int', 'not null' => TRUE],
+      'quantity_to' => ['type' => 'int', 'not null' => TRUE],
+      'price_per_box' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE],
+      'print_single_cost' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE, 'default' => 0],
+      'print_multi_cost' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE, 'default' => 0],
+      'coating_cost' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE, 'default' => 0],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'price_lookup' => ['shape', 'board_grade', 'quantity_from', 'quantity_to'],
+    ],
+  ];
+
+  $schema['ambey_box_quote'] = [
+    'description' => 'Stores box quotations.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'not null' => TRUE],
+      'uuid' => ['type' => 'varchar', 'length' => 36, 'not null' => TRUE],
+      'created' => ['type' => 'int', 'not null' => TRUE],
+      'name' => ['type' => 'varchar', 'length' => 100],
+      'email' => ['type' => 'varchar', 'length' => 255],
+      'phone' => ['type' => 'varchar', 'length' => 30],
+      'company' => ['type' => 'varchar', 'length' => 150],
+      'shape' => ['type' => 'varchar', 'length' => 50],
+      'product_type' => ['type' => 'varchar', 'length' => 100],
+      'board_grade' => ['type' => 'varchar', 'length' => 50],
+      'length' => ['type' => 'float'],
+      'width' => ['type' => 'float'],
+      'height' => ['type' => 'float'],
+      'color' => ['type' => 'varchar', 'length' => 50],
+      'print_type' => ['type' => 'varchar', 'length' => 50],
+      'quality' => ['type' => 'varchar', 'length' => 50],
+      'coating' => ['type' => 'varchar', 'length' => 50],
+      'shipping_zone' => ['type' => 'varchar', 'length' => 50],
+      'quantity' => ['type' => 'int'],
+      'base_price' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2],
+      'gst' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2],
+      'final_price' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2],
+      'total_without_gst' => ['type' => 'numeric', 'precision' => 12, 'scale' => 2],
+      'total_with_gst' => ['type' => 'numeric', 'precision' => 12, 'scale' => 2],
+      'status' => ['type' => 'varchar', 'length' => 50, 'not null' => TRUE, 'default' => 'new'],
+      'priority' => ['type' => 'varchar', 'length' => 20, 'not null' => TRUE, 'default' => 'medium'],
+      'assigned_uid' => ['type' => 'int', 'not null' => FALSE],
+      'assigned_by' => ['type' => 'int', 'not null' => FALSE],
+      'assigned_date' => ['type' => 'int', 'not null' => FALSE],
+      'changed' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+      'description' => ['type' => 'text', 'size' => 'big'],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => [
+      'uuid' => ['uuid'],
+    ],
+    'indexes' => [
+      'created' => ['created'],
+      'changed' => ['changed'],
+      'email' => ['email'],
+      'status' => ['status'],
+      'priority' => ['priority'],
+      'assigned_uid' => ['assigned_uid'],
+    ],
+  ];
+
+  $schema['ambey_box_quote_note'] = [
+    'description' => 'Internal notes for box quotations.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'not null' => TRUE],
+      'quote_id' => ['type' => 'int', 'not null' => TRUE],
+      'uid' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+      'note' => ['type' => 'text', 'size' => 'big', 'not null' => TRUE],
+      'created' => ['type' => 'int', 'not null' => TRUE],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'quote_id' => ['quote_id'],
+      'created' => ['created'],
+    ],
+  ];
+
+  $schema['ambey_box_quote_audit'] = [
+    'description' => 'Audit log for box quotations.',
+    'fields' => [
+      'id' => ['type' => 'serial', 'not null' => TRUE],
+      'quote_id' => ['type' => 'int', 'not null' => TRUE],
+      'uid' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+      'event' => ['type' => 'varchar', 'length' => 50, 'not null' => TRUE],
+      'message' => ['type' => 'text', 'size' => 'normal', 'not null' => TRUE],
+      'created' => ['type' => 'int', 'not null' => TRUE],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'quote_id' => ['quote_id'],
+      'created' => ['created'],
+      'event' => ['event'],
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function ambey_box_calculator_install() {
+  $connection = \Drupal::database();
+  $rows = [
+    ['regular', '3ply', 1, 499, 18.36, 1.50, 3.00, 1.20],
+    ['regular', '3ply', 500, 999, 15.11, 1.50, 3.00, 1.20],
+    ['regular', '3ply', 1000, 1999, 10.72, 1.25, 2.75, 1.10],
+    ['pizza', '3ply', 1, 499, 24.74, 1.50, 3.00, 1.20],
+    ['pizza', '3ply', 500, 999, 17.37, 1.50, 3.00, 1.20],
+    ['pizza', '3ply', 1000, 1999, 15.12, 1.25, 2.75, 1.10],
+    ['regular', '5ply', 1, 499, 33.84, 1.75, 3.50, 1.50],
+    ['regular', '5ply', 500, 999, 29.54, 1.75, 3.50, 1.50],
+    ['regular', '7ply', 1, 499, 93.26, 2.00, 4.00, 1.75],
+    ['regular', '7ply', 500, 999, 93.02, 2.00, 4.00, 1.75],
+  ];
+
+  foreach ($rows as $row) {
+    $connection->insert('ambey_box_pricing')->fields([
+      'shape' => $row[0],
+      'board_grade' => $row[1],
+      'quantity_from' => $row[2],
+      'quantity_to' => $row[3],
+      'price_per_box' => $row[4],
+      'print_single_cost' => $row[5],
+      'print_multi_cost' => $row[6],
+      'coating_cost' => $row[7],
+    ])->execute();
+  }
+
+  ambey_box_calculator_grant_administrator_quote_permissions();
+}
+
+/**
+ * Grants quote management permissions to the administrator role.
+ */
+function ambey_box_calculator_grant_administrator_quote_permissions(): void {
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('administrator');
+  if (!$role) {
+    return;
+  }
+
+  foreach ([
+    'administer quotes',
+    'view quotes',
+    'edit quotes',
+    'delete quotes',
+    'export quotes',
+  ] as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
+}
+
+/**
+ * Add UUIDs to quote records for public quote URLs.
+ */
+function ambey_box_calculator_update_9001() {
+  $database = \Drupal::database();
+  $schema = $database->schema();
+
+  if (!$schema->fieldExists('ambey_box_quote', 'uuid')) {
+    $schema->addField('ambey_box_quote', 'uuid', [
+      'type' => 'varchar',
+      'length' => 36,
+      'not null' => FALSE,
+    ]);
+  }
+
+  $ids = $database->select('ambey_box_quote', 'q')
+    ->fields('q', ['id'])
+    ->isNull('uuid')
+    ->execute()
+    ->fetchCol();
+
+  $uuid = \Drupal::service('uuid');
+  foreach ($ids as $id) {
+    $database->update('ambey_box_quote')
+      ->fields(['uuid' => $uuid->generate()])
+      ->condition('id', $id)
+      ->execute();
+  }
+
+  $schema->changeField('ambey_box_quote', 'uuid', 'uuid', [
+    'type' => 'varchar',
+    'length' => 36,
+    'not null' => TRUE,
+  ]);
+
+  if (!$schema->indexExists('ambey_box_quote', 'uuid')) {
+    $schema->addUniqueKey('ambey_box_quote', 'uuid', ['uuid']);
+  }
+}
+
+/**
+ * Add quote management workflow fields, notes, and audit tables.
+ */
+function ambey_box_calculator_update_9002() {
+  $database = \Drupal::database();
+  $schema = $database->schema();
+
+  $fields = [
+    'company' => ['type' => 'varchar', 'length' => 150],
+    'product_type' => ['type' => 'varchar', 'length' => 100],
+    'status' => ['type' => 'varchar', 'length' => 50, 'not null' => TRUE, 'default' => 'new'],
+    'priority' => ['type' => 'varchar', 'length' => 20, 'not null' => TRUE, 'default' => 'medium'],
+    'assigned_uid' => ['type' => 'int', 'not null' => FALSE],
+    'assigned_by' => ['type' => 'int', 'not null' => FALSE],
+    'assigned_date' => ['type' => 'int', 'not null' => FALSE],
+    'changed' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+    'description' => ['type' => 'text', 'size' => 'big'],
+  ];
+
+  foreach ($fields as $name => $definition) {
+    if (!$schema->fieldExists('ambey_box_quote', $name)) {
+      $schema->addField('ambey_box_quote', $name, $definition);
+    }
+  }
+
+  $database->update('ambey_box_quote')
+    ->expression('changed', 'created')
+    ->condition('changed', 0)
+    ->execute();
+
+  $database->update('ambey_box_quote')
+    ->fields(['status' => 'new'])
+    ->condition('status', '', '=')
+    ->execute();
+
+  $database->update('ambey_box_quote')
+    ->fields(['priority' => 'medium'])
+    ->condition('priority', '', '=')
+    ->execute();
+
+  foreach (['changed', 'status', 'priority', 'assigned_uid'] as $index) {
+    if (!$schema->indexExists('ambey_box_quote', $index)) {
+      $schema->addIndex('ambey_box_quote', $index, [$index], ['fields' => [$index => $fields[$index]]]);
+    }
+  }
+
+  if (!$schema->tableExists('ambey_box_quote_note')) {
+    $schema->createTable('ambey_box_quote_note', [
+      'description' => 'Internal notes for box quotations.',
+      'fields' => [
+        'id' => ['type' => 'serial', 'not null' => TRUE],
+        'quote_id' => ['type' => 'int', 'not null' => TRUE],
+        'uid' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+        'note' => ['type' => 'text', 'size' => 'big', 'not null' => TRUE],
+        'created' => ['type' => 'int', 'not null' => TRUE],
+      ],
+      'primary key' => ['id'],
+      'indexes' => [
+        'quote_id' => ['quote_id'],
+        'created' => ['created'],
+      ],
+    ]);
+  }
+
+  if (!$schema->tableExists('ambey_box_quote_audit')) {
+    $schema->createTable('ambey_box_quote_audit', [
+      'description' => 'Audit log for box quotations.',
+      'fields' => [
+        'id' => ['type' => 'serial', 'not null' => TRUE],
+        'quote_id' => ['type' => 'int', 'not null' => TRUE],
+        'uid' => ['type' => 'int', 'not null' => TRUE, 'default' => 0],
+        'event' => ['type' => 'varchar', 'length' => 50, 'not null' => TRUE],
+        'message' => ['type' => 'text', 'size' => 'normal', 'not null' => TRUE],
+        'created' => ['type' => 'int', 'not null' => TRUE],
+      ],
+      'primary key' => ['id'],
+      'indexes' => [
+        'quote_id' => ['quote_id'],
+        'created' => ['created'],
+        'event' => ['event'],
+      ],
+    ]);
+  }
+}
+
+/**
+ * Grant quote management permissions to administrator role.
+ */
+function ambey_box_calculator_update_9003() {
+  ambey_box_calculator_grant_administrator_quote_permissions();
+}

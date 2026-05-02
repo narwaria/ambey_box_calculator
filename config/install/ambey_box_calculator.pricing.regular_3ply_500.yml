@@ -1,0 +1,7 @@
+id: regular_3ply_500
+label: 'Regular 3 Ply 500-999'
+shape: regular
+board_grade: 3ply
+quantity_from: 500
+quantity_to: 999
+price_per_box: 15.11

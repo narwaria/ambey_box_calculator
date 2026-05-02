@@ -1,0 +1,5 @@
+id: pizza
+label: 'Pizza Box'
+description: 'Flat pizza packaging box'
+image: '/modules/custom/ambey_box_calculator/ambey_box_calculator/images/pizza.png'
+enabled: true

@@ -1,0 +1,8 @@
+{
+  "name": "drupal/ambey_box_calculator",
+  "type": "drupal-custom-module",
+  "description": "Ambey Box Calculator custom Drupal module.",
+  "require": {
+    "dompdf/dompdf": "^3.0"
+  }
+}

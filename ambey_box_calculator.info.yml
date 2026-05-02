@@ -1,0 +1,5 @@
+name: 'Ambey Box Calculator'
+type: module
+description: 'Provides a Drupal 11 box calculator with pricing slabs, GST, quote storage, PDF, email, API, and admin tools.'
+package: Custom
+core_version_requirement: ^11
