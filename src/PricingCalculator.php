@@ -15,6 +15,11 @@ class PricingCalculator {
   private const REFERENCE_LENGTH = 10.0;
   private const REFERENCE_WIDTH = 8.0;
   private const REFERENCE_HEIGHT = 5.0;
+  private const BOARD_GRADE_FACTORS = [
+    '3ply' => 1.0,
+    '5ply' => 1.75,
+    '7ply' => 2.5,
+  ];
 
   public function __construct(
     protected Connection $database,
@@ -32,7 +37,8 @@ class PricingCalculator {
     }
 
     $dimension_multiplier = $this->calculateDimensionMultiplier($length, $width, $height);
-    $cache_key = 'price:' . hash('sha256', implode('|', [$shape, $board, $quantity, $print, $coating, $color, $shipping_zone, $dimension_multiplier]));
+    $board_factor = $this->getBoardGradeFactor($board);
+    $cache_key = 'price:' . hash('sha256', implode('|', [$shape, $board, $quantity, $print, $coating, $color, $shipping_zone, $dimension_multiplier, $board_factor]));
     if ($cache = $this->cache->get($cache_key)) {
       return (float) $cache->data;
     }
@@ -47,7 +53,7 @@ class PricingCalculator {
       return 0.0;
     }
 
-    $price = (float) $row['price_per_box'] * $dimension_multiplier;
+    $price = (float) $row['price_per_box'] * $dimension_multiplier * $board_factor;
 
     if ($print === 'single') {
       $price += (float) $row['print_single_cost'];
@@ -104,6 +110,7 @@ class PricingCalculator {
         (float) ($data['width'] ?? 0),
         (float) ($data['height'] ?? 0),
       ),
+      'board_grade_factor' => $this->getBoardGradeFactor((string) ($data['board_grade'] ?? '')),
       'dimension_multiplier' => $this->calculateDimensionMultiplier(
         (float) ($data['length'] ?? 0),
         (float) ($data['width'] ?? 0),
@@ -175,6 +182,13 @@ class PricingCalculator {
 
     $reference_area = $this->calculateBoxSurfaceArea(self::REFERENCE_LENGTH, self::REFERENCE_WIDTH, self::REFERENCE_HEIGHT);
     return round($area / $reference_area, 4);
+  }
+
+  /**
+   * Gets the material multiplier for a board grade.
+   */
+  public function getBoardGradeFactor(string $board): float {
+    return self::BOARD_GRADE_FACTORS[$board] ?? 1.0;
   }
 
   /**

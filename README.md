@@ -59,8 +59,21 @@ surface area = 2 * ((length * width) + (length * height) + (width * height))
 dimension multiplier = entered surface area / reference surface area
 ```
 
-4. Scale the slab `price_per_box` by the dimension multiplier.
-5. Add print cost:
+4. Apply the board grade material factor:
+
+```text
+3 Ply = 1.00
+5 Ply = 1.75
+7 Ply = 2.50
+```
+
+5. Scale the slab `price_per_box`:
+
+```text
+size_and_board_price = price_per_box * dimension_multiplier * board_grade_factor
+```
+
+6. Add print cost:
 
 ```text
 single colour = print_single_cost
@@ -68,10 +81,10 @@ multi colour = print_multi_cost
 none = 0
 ```
 
-6. Add coating cost only when `color` is `white` and `coating` is selected.
-7. Add the selected shipping zone cost per box.
-8. Apply 12% GST.
-9. Calculate totals:
+7. Add coating cost only when `color` is `white` and `coating` is selected.
+8. Add the selected shipping zone cost per box.
+9. Apply 12% GST.
+10. Calculate totals:
 
 ```text
 total_without_gst = base_price * quantity

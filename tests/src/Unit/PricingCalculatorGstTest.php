@@ -43,6 +43,14 @@ class PricingCalculatorGstTest extends UnitTestCase {
     $this->assertSame(4.0, $calculator->calculateDimensionMultiplier(20, 16, 10));
   }
 
+  public function testGetBoardGradeFactor(): void {
+    $calculator = $this->calculator();
+    $this->assertSame(1.0, $calculator->getBoardGradeFactor('3ply'));
+    $this->assertSame(1.75, $calculator->getBoardGradeFactor('5ply'));
+    $this->assertSame(2.5, $calculator->getBoardGradeFactor('7ply'));
+    $this->assertSame(1.0, $calculator->getBoardGradeFactor('unknown'));
+  }
+
   public function testFormatIndianCurrency(): void {
     $this->assertSame('₹37,98,000.00', PricingCalculator::formatIndianCurrency(3798000));
   }
