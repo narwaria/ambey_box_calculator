@@ -779,4 +779,13 @@ label[for="edit-coating-emboss"]::after { content: "Raised pattern finishing"; }
   .ambey-customer-fields .form-item-message {
     grid-column: auto;
   }
+
+  .ambey-coating-field .form-type-radio {
+    aspect-ratio: auto;
+    min-height: 82px;
+  }
+
+  .ambey-coating-field label.option {
+    min-height: 82px;
+  }
 }
