@@ -38,6 +38,9 @@ ambey_box_calculator.settings:
     price_cache_lifetime:
       type: integer
       label: 'Price cache lifetime'
+    calculation_debug_enabled:
+      type: boolean
+      label: 'Calculation debug enabled'
     single_print_min_quantity:
       type: integer
       label: 'Single print minimum quantity'

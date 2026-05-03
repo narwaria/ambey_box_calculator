@@ -122,6 +122,8 @@ curl -X POST https://example.com/api/box/quote \
 - Shipping zones: `/admin/config/box-calculator/shipping`
 - CRM settings: `/admin/config/box-calculator/crm`
 
+Enable calculation debug mode from Global settings to show the formula breakdown in the quotation summary and API calculation response.
+
 ## Verification
 
 ```bash

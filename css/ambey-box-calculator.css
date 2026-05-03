@@ -259,7 +259,7 @@
 }
 
 .ambey-quantity-field::before {
-  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 8h14M10 17h14M10 26h14M5 8h.1M5 17h.1M5 26h.1' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 15h10v10H6zM18 15h10v10H18zM12 5h10v10H12zM6 15l5-5M16 15l5-5M18 15l5-5M28 15l-6-10' fill='none' stroke='black' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .ambey-customer-fields::before {
@@ -608,6 +608,45 @@ label[for="edit-coating-emboss"]::after { content: "Raised pattern finishing"; }
   color: var(--ag-orange);
   font-size: 2rem;
   font-weight: 950;
+}
+
+.ambey-price-debug {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 14px;
+  color: #102033;
+  background: #f8fbff;
+  border: 1px dashed #94b9e8;
+  border-radius: 8px;
+}
+
+.ambey-price-debug h4 {
+  margin: 0 0 4px;
+  color: #124178;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.ambey-price-debug div {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 10px;
+  align-items: start;
+  padding-top: 8px;
+  border-top: 1px solid #e1edf8;
+  font-size: 0.78rem;
+}
+
+.ambey-price-debug span {
+  color: #456077;
+  font-weight: 800;
+}
+
+.ambey-price-debug strong {
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  font-weight: 800;
 }
 
 .ambey-trust-list {

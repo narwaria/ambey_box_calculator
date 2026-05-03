@@ -10,6 +10,7 @@ default_quality: 'standard'
 default_shipping: 'local'
 gst_rate: 0.12
 price_cache_lifetime: 3600
+calculation_debug_enabled: false
 single_print_min_quantity: 500
 multi_print_min_quantity: 3000
 coating_allowed_color: 'white'

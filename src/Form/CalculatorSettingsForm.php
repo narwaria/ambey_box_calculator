@@ -63,6 +63,19 @@ class CalculatorSettingsForm extends ConfigFormBase {
     ];
     $form['pdf']['pdf_logo_path'] = ['#type' => 'textfield', '#title' => $this->t('PDF Logo Path'), '#description' => $this->t('Optional absolute path or Drupal-root-relative path. Leave blank to use the Drupal logo fallback.'), '#default_value' => $config->get('pdf_logo_path') ?? ''];
 
+    $form['debug'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Debugging'),
+      '#open' => TRUE,
+      '#weight' => 100,
+    ];
+    $form['debug']['calculation_debug_enabled'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable Calculation Debug Mode'),
+      '#description' => $this->t('Shows a pricing formula breakdown in the quotation summary and returns debug data from API calculations.'),
+      '#default_value' => (bool) ($config->get('calculation_debug_enabled') ?? FALSE),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -87,6 +100,7 @@ class CalculatorSettingsForm extends ConfigFormBase {
       ->set('default_shipping', (string) $form_state->getValue('default_shipping'))
       ->set('gst_rate', (float) $form_state->getValue('gst_rate'))
       ->set('price_cache_lifetime', (int) $form_state->getValue('price_cache_lifetime'))
+      ->set('calculation_debug_enabled', (bool) $form_state->getValue('calculation_debug_enabled'))
       ->set('single_print_min_quantity', (int) $form_state->getValue('single_print_min_quantity'))
       ->set('multi_print_min_quantity', (int) $form_state->getValue('multi_print_min_quantity'))
       ->set('coating_allowed_color', (string) $form_state->getValue('coating_allowed_color'))

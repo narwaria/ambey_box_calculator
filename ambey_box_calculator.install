@@ -350,6 +350,7 @@ function ambey_box_calculator_update_9005() {
     'default_shipping' => 'local',
     'gst_rate' => 0.12,
     'price_cache_lifetime' => 3600,
+    'calculation_debug_enabled' => FALSE,
     'single_print_min_quantity' => 500,
     'multi_print_min_quantity' => 3000,
     'coating_allowed_color' => 'white',
@@ -369,4 +370,14 @@ function ambey_box_calculator_update_9005() {
   }
   $config->save();
   ambey_box_calculator_grant_administrator_quote_permissions();
+}
+
+/**
+ * Add calculation debug mode setting.
+ */
+function ambey_box_calculator_update_9006() {
+  $config = \Drupal::configFactory()->getEditable('ambey_box_calculator.settings');
+  if ($config->get('calculation_debug_enabled') === NULL) {
+    $config->set('calculation_debug_enabled', FALSE)->save();
+  }
 }

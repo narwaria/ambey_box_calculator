@@ -313,7 +313,49 @@ class BoxCalculatorForm extends FormBase {
     if ($quantity > 0) {
       $form['pricing']['total'] = ['#markup' => '<div class="ambey-price-total"><span>Total With GST</span><strong>' . PricingCalculator::formatIndianCurrency($result['total_with_gst']) . '</strong></div>'];
     }
+    if (!empty($result['calculation_debug'])) {
+      $form['pricing']['debug'] = ['#markup' => $this->buildCalculationDebugMarkup($result['calculation_debug'])];
+    }
     $form['pricing']['trust'] = ['#markup' => '<div class="ambey-trust-list"><div><strong>Best Price Guarantee</strong><span>Get competitive prices instantly.</span></div><div><strong>Secure & Reliable</strong><span>Your information is safe with us.</span></div><div><strong>Quick Response</strong><span>We will get back within 24 hours.</span></div></div>'];
+  }
+
+  private function buildCalculationDebugMarkup(array $debug): string {
+    $labels = [
+      'box_area_formula' => 'Area Formula',
+      'box_area_sq_in' => 'Box Area',
+      'reference_area_sq_in' => 'Reference Area',
+      'dimension_multiplier' => 'Dimension Multiplier',
+      'slab_price_per_box' => 'Slab Price',
+      'board_grade_factor' => 'Board Factor',
+      'size_board_price' => 'Size + Board Price',
+      'print_addon' => 'Print Add-on',
+      'coating_addon' => 'Coating Add-on',
+      'shipping_addon' => 'Shipping Add-on',
+      'base_price_formula' => 'Base Formula',
+      'base_price' => 'Base Price',
+      'gst_rate' => 'GST Rate',
+      'gst' => 'GST',
+      'final_price' => 'Final Per Box',
+      'total_with_gst' => 'Total With GST',
+    ];
+    $currency_keys = ['slab_price_per_box', 'size_board_price', 'print_addon', 'coating_addon', 'shipping_addon', 'base_price', 'gst', 'final_price', 'total_with_gst'];
+    $rows = '';
+
+    foreach ($labels as $key => $label) {
+      if (!array_key_exists($key, $debug)) {
+        continue;
+      }
+      $value = $debug[$key];
+      if (in_array($key, $currency_keys, TRUE)) {
+        $value = PricingCalculator::formatIndianCurrency($value);
+      }
+      elseif ($key === 'gst_rate') {
+        $value = ((float) $value * 100) . '%';
+      }
+      $rows .= '<div><span>' . Html::escape($label) . '</span><strong>' . Html::escape((string) $value) . '</strong></div>';
+    }
+
+    return '<div class="ambey-price-debug"><h4>Calculation Debug</h4>' . $rows . '</div>';
   }
 
   private function calculateBasePrice(FormStateInterface $form_state): float {

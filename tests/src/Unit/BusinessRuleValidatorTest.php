@@ -3,8 +3,8 @@
 namespace Drupal\Tests\ambey_box_calculator\Unit;
 
 use Drupal\ambey_box_calculator\BusinessRuleValidator;
-use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -12,7 +12,7 @@ use Drupal\Tests\UnitTestCase;
  */
 class BusinessRuleValidatorTest extends UnitTestCase {
   private function validator(): BusinessRuleValidator {
-    $config = $this->createMock(Config::class);
+    $config = $this->createMock(ImmutableConfig::class);
     $config->method('get')->willReturnMap([
       ['single_print_min_quantity', 500],
       ['multi_print_min_quantity', 3000],

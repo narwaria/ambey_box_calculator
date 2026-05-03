@@ -5,6 +5,7 @@ namespace Drupal\Tests\ambey_box_calculator\Unit;
 use Drupal\ambey_box_calculator\PricingCalculator;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Tests\UnitTestCase;
@@ -15,12 +16,20 @@ use Psr\Log\LoggerInterface;
  */
 class PricingCalculatorGstTest extends UnitTestCase {
   private function calculator(): PricingCalculator {
+    $config = $this->createMock(ImmutableConfig::class);
+    $config->method('get')->willReturnMap([
+      ['gst_rate', 0.12],
+      ['board_grade_factors', ['mono' => 0.75, '3ply' => 1.0, '5ply' => 1.75, '7ply' => 2.5]],
+    ]);
+    $config_factory = $this->createMock(ConfigFactoryInterface::class);
+    $config_factory->method('get')->with('ambey_box_calculator.settings')->willReturn($config);
+
     return new PricingCalculator(
       $this->createMock(Connection::class),
       $this->createMock(CacheBackendInterface::class),
       $this->createMock(EntityTypeManagerInterface::class),
       $this->createMock(LoggerInterface::class),
-      $this->createMock(ConfigFactoryInterface::class)
+      $config_factory
     );
   }
 

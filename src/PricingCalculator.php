@@ -71,7 +71,8 @@ class PricingCalculator {
       $price += (float) $row['print_multi_cost'];
     }
 
-    if ($color === 'white' && $coating !== '') {
+    $coating_allowed_color = (string) ($this->settings()->get('coating_allowed_color') ?? 'white');
+    if ($color === $coating_allowed_color && $coating !== '') {
       $price += (float) $row['coating_cost'];
     }
 
@@ -101,48 +102,92 @@ class PricingCalculator {
       (string) ($data['board_grade'] ?? $settings->get('default_board_grade') ?? ''),
       $quantity,
     );
+    $shape = (string) ($data['shape'] ?? $settings->get('default_shape') ?? '');
+    $board = (string) ($data['board_grade'] ?? $settings->get('default_board_grade') ?? '');
+    $print = (string) ($data['print'] ?? $data['print_type'] ?? $settings->get('default_print') ?? 'none');
+    $coating = (string) ($data['coating'] ?? '');
+    $color = (string) ($data['color'] ?? $settings->get('default_color') ?? 'brown');
+    $shipping = (string) ($data['shipping'] ?? $data['shipping_zone'] ?? $settings->get('default_shipping') ?? '');
+    $length = (float) ($data['length'] ?? $settings->get('default_length') ?? 0);
+    $width = (float) ($data['width'] ?? $settings->get('default_width') ?? 0);
+    $height = (float) ($data['height'] ?? $settings->get('default_height') ?? 0);
+
     $base = $this->getPriceWithAddons(
       (string) ($data['shape'] ?? $settings->get('default_shape') ?? ''),
       (string) ($data['board_grade'] ?? $settings->get('default_board_grade') ?? ''),
       $quantity,
-      (string) ($data['print'] ?? $data['print_type'] ?? $settings->get('default_print') ?? 'none'),
-      (string) ($data['coating'] ?? ''),
-      (string) ($data['color'] ?? $settings->get('default_color') ?? 'brown'),
-      (string) ($data['shipping'] ?? $data['shipping_zone'] ?? $settings->get('default_shipping') ?? ''),
-      (float) ($data['length'] ?? $settings->get('default_length') ?? 0),
-      (float) ($data['width'] ?? $settings->get('default_width') ?? 0),
-      (float) ($data['height'] ?? $settings->get('default_height') ?? 0),
+      $print,
+      $coating,
+      $color,
+      $shipping,
+      $length,
+      $width,
+      $height,
     );
     $gst = $this->applyGST($base);
     $reference_length = (float) ($pricing_row['reference_length'] ?? self::REFERENCE_LENGTH);
     $reference_width = (float) ($pricing_row['reference_width'] ?? self::REFERENCE_WIDTH);
     $reference_height = (float) ($pricing_row['reference_height'] ?? self::REFERENCE_HEIGHT);
+    $box_area = $this->calculateBoxSurfaceArea($length, $width, $height);
+    $reference_area = $this->calculateBoxSurfaceArea($reference_length, $reference_width, $reference_height);
+    $dimension_multiplier = $this->calculateDimensionMultiplier($length, $width, $height, $reference_length, $reference_width, $reference_height);
+    $board_factor = $this->getBoardGradeFactor($board);
+    $slab_price = (float) ($pricing_row['price_per_box'] ?? 0);
+    $size_board_price = round($slab_price * $dimension_multiplier * $board_factor, 2);
+    $print_addon = $print === 'single' ? (float) ($pricing_row['print_single_cost'] ?? 0) : ($print === 'multi' ? (float) ($pricing_row['print_multi_cost'] ?? 0) : 0.0);
+    $coating_addon = ($color === (string) ($settings->get('coating_allowed_color') ?? 'white') && $coating !== '') ? (float) ($pricing_row['coating_cost'] ?? 0) : 0.0;
+    $shipping_addon = $shipping !== '' ? $this->getShippingCost($shipping) : 0.0;
 
-    return [
+    $result = [
       'base_price' => $gst['base'],
       'gst' => $gst['gst'],
       'final_price' => $gst['final'],
       'total_without_gst' => round($gst['base'] * $quantity, 2),
       'total_with_gst' => round($gst['final'] * $quantity, 2),
-      'box_area_sq_in' => $this->calculateBoxSurfaceArea(
-        (float) ($data['length'] ?? $settings->get('default_length') ?? 0),
-        (float) ($data['width'] ?? $settings->get('default_width') ?? 0),
-        (float) ($data['height'] ?? $settings->get('default_height') ?? 0),
-      ),
+      'box_area_sq_in' => $box_area,
       'reference_length' => $reference_length,
       'reference_width' => $reference_width,
       'reference_height' => $reference_height,
-      'reference_area_sq_in' => $this->calculateBoxSurfaceArea($reference_length, $reference_width, $reference_height),
-      'board_grade_factor' => $this->getBoardGradeFactor((string) ($data['board_grade'] ?? $settings->get('default_board_grade') ?? '')),
-      'dimension_multiplier' => $this->calculateDimensionMultiplier(
-        (float) ($data['length'] ?? $settings->get('default_length') ?? 0),
-        (float) ($data['width'] ?? $settings->get('default_width') ?? 0),
-        (float) ($data['height'] ?? $settings->get('default_height') ?? 0),
-        $reference_length,
-        $reference_width,
-        $reference_height,
-      ),
+      'reference_area_sq_in' => $reference_area,
+      'board_grade_factor' => $board_factor,
+      'dimension_multiplier' => $dimension_multiplier,
     ];
+
+    if ((bool) ($settings->get('calculation_debug_enabled') ?? FALSE)) {
+      $result['calculation_debug'] = [
+        'shape' => $shape,
+        'board_grade' => $board,
+        'quantity' => $quantity,
+        'length' => $length,
+        'width' => $width,
+        'height' => $height,
+        'box_area_formula' => '2 * ((L * W) + (L * H) + (W * H))',
+        'box_area_sq_in' => $box_area,
+        'reference_length' => $reference_length,
+        'reference_width' => $reference_width,
+        'reference_height' => $reference_height,
+        'reference_area_sq_in' => $reference_area,
+        'dimension_multiplier' => $dimension_multiplier,
+        'slab_price_per_box' => $slab_price,
+        'board_grade_factor' => $board_factor,
+        'size_board_price' => $size_board_price,
+        'print' => $print,
+        'print_addon' => $print_addon,
+        'coating' => $coating,
+        'coating_addon' => $coating_addon,
+        'shipping' => $shipping,
+        'shipping_addon' => $shipping_addon,
+        'base_price_formula' => '(slab_price_per_box * dimension_multiplier * board_grade_factor) + print_addon + coating_addon + shipping_addon',
+        'base_price' => $gst['base'],
+        'gst_rate' => (float) ($settings->get('gst_rate') ?? 0.12),
+        'gst' => $gst['gst'],
+        'final_price' => $gst['final'],
+        'total_without_gst' => $result['total_without_gst'],
+        'total_with_gst' => $result['total_with_gst'],
+      ];
+    }
+
+    return $result;
   }
 
   /**
