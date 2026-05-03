@@ -3,6 +3,7 @@
 namespace Drupal\ambey_box_calculator\Controller;
 
 use Drupal\ambey_box_calculator\Form\AdminQuoteManageForm;
+use Drupal\ambey_box_calculator\PricingCalculator;
 use Drupal\ambey_box_calculator\QuoteStorage;
 use Drupal\Core\Controller\ControllerBase;
 
@@ -18,6 +19,7 @@ class AdminQuoteDetailController extends ControllerBase {
     $quote['assigned_to_label'] = !empty($quote['assigned_uid']) ? $this->userName((int) $quote['assigned_uid']) : $this->t('Unassigned');
     $quote['created_label'] = date('d M Y H:i', (int) $quote['created']);
     $quote['changed_label'] = !empty($quote['changed']) ? date('d M Y H:i', (int) $quote['changed']) : '';
+    $quote = $this->formatQuoteAmounts($quote);
 
     return [
       '#theme' => 'admin_quote_detail',
@@ -35,6 +37,13 @@ class AdminQuoteDetailController extends ControllerBase {
       $row['created_label'] = date('d M Y H:i', (int) $row['created']);
     }
     return $rows;
+  }
+
+  private function formatQuoteAmounts(array $quote): array {
+    foreach (['base_price', 'gst', 'final_price', 'total_without_gst', 'total_with_gst'] as $field) {
+      $quote[$field] = PricingCalculator::formatIndianNumber($quote[$field] ?? 0);
+    }
+    return $quote;
   }
 
   private function userName(int $uid): string {

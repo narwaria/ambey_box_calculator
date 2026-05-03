@@ -13,23 +13,37 @@ use Psr\Log\LoggerInterface;
  * @group ambey_box_calculator
  */
 class PricingCalculatorGstTest extends UnitTestCase {
-  public function testApplyGst(): void {
-    $calculator = new PricingCalculator(
+  private function calculator(): PricingCalculator {
+    return new PricingCalculator(
       $this->createMock(Connection::class),
       $this->createMock(CacheBackendInterface::class),
       $this->createMock(EntityTypeManagerInterface::class),
       $this->createMock(LoggerInterface::class)
     );
+  }
+
+  public function testApplyGst(): void {
+    $calculator = $this->calculator();
     $this->assertSame(['base' => 100.0, 'gst' => 12.0, 'final' => 112.0], $calculator->applyGST(100));
   }
 
   public function testApplyGstRounding(): void {
-    $calculator = new PricingCalculator(
-      $this->createMock(Connection::class),
-      $this->createMock(CacheBackendInterface::class),
-      $this->createMock(EntityTypeManagerInterface::class),
-      $this->createMock(LoggerInterface::class)
-    );
+    $calculator = $this->calculator();
     $this->assertSame(['base' => 11.72, 'gst' => 1.41, 'final' => 13.13], $calculator->applyGST(11.72));
+  }
+
+  public function testCalculateBoxSurfaceArea(): void {
+    $calculator = $this->calculator();
+    $this->assertSame(340.0, $calculator->calculateBoxSurfaceArea(10, 8, 5));
+  }
+
+  public function testCalculateDimensionMultiplier(): void {
+    $calculator = $this->calculator();
+    $this->assertSame(1.0, $calculator->calculateDimensionMultiplier(10, 8, 5));
+    $this->assertSame(4.0, $calculator->calculateDimensionMultiplier(20, 16, 10));
+  }
+
+  public function testFormatIndianCurrency(): void {
+    $this->assertSame('₹37,98,000.00', PricingCalculator::formatIndianCurrency(3798000));
   }
 }

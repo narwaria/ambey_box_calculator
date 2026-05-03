@@ -12,6 +12,10 @@ use Psr\Log\LoggerInterface;
  */
 class PricingCalculator {
 
+  private const REFERENCE_LENGTH = 10.0;
+  private const REFERENCE_WIDTH = 8.0;
+  private const REFERENCE_HEIGHT = 5.0;
+
   public function __construct(
     protected Connection $database,
     protected CacheBackendInterface $cache,
@@ -22,12 +26,13 @@ class PricingCalculator {
   /**
    * Gets per-box price with print, coating and shipping add-ons.
    */
-  public function getPriceWithAddons(string $shape, string $board, int $quantity, string $print = 'none', string $coating = '', string $color = 'brown', string $shipping_zone = ''): float {
+  public function getPriceWithAddons(string $shape, string $board, int $quantity, string $print = 'none', string $coating = '', string $color = 'brown', string $shipping_zone = '', float $length = 0.0, float $width = 0.0, float $height = 0.0): float {
     if ($shape === '' || $board === '' || $quantity <= 0) {
       return 0.0;
     }
 
-    $cache_key = 'price:' . hash('sha256', implode('|', [$shape, $board, $quantity, $print, $coating, $color, $shipping_zone]));
+    $dimension_multiplier = $this->calculateDimensionMultiplier($length, $width, $height);
+    $cache_key = 'price:' . hash('sha256', implode('|', [$shape, $board, $quantity, $print, $coating, $color, $shipping_zone, $dimension_multiplier]));
     if ($cache = $this->cache->get($cache_key)) {
       return (float) $cache->data;
     }
@@ -42,7 +47,7 @@ class PricingCalculator {
       return 0.0;
     }
 
-    $price = (float) $row['price_per_box'];
+    $price = (float) $row['price_per_box'] * $dimension_multiplier;
 
     if ($print === 'single') {
       $price += (float) $row['print_single_cost'];
@@ -72,6 +77,41 @@ class PricingCalculator {
     return $price;
   }
 
+  public function calculateQuotePrices(array $data): array {
+    $quantity = (int) ($data['quantity'] ?? 0);
+    $base = $this->getPriceWithAddons(
+      (string) ($data['shape'] ?? ''),
+      (string) ($data['board_grade'] ?? ''),
+      $quantity,
+      (string) ($data['print'] ?? $data['print_type'] ?? 'none'),
+      (string) ($data['coating'] ?? ''),
+      (string) ($data['color'] ?? 'brown'),
+      (string) ($data['shipping'] ?? $data['shipping_zone'] ?? ''),
+      (float) ($data['length'] ?? 0),
+      (float) ($data['width'] ?? 0),
+      (float) ($data['height'] ?? 0),
+    );
+    $gst = $this->applyGST($base);
+
+    return [
+      'base_price' => $gst['base'],
+      'gst' => $gst['gst'],
+      'final_price' => $gst['final'],
+      'total_without_gst' => round($gst['base'] * $quantity, 2),
+      'total_with_gst' => round($gst['final'] * $quantity, 2),
+      'box_area_sq_in' => $this->calculateBoxSurfaceArea(
+        (float) ($data['length'] ?? 0),
+        (float) ($data['width'] ?? 0),
+        (float) ($data['height'] ?? 0),
+      ),
+      'dimension_multiplier' => $this->calculateDimensionMultiplier(
+        (float) ($data['length'] ?? 0),
+        (float) ($data['width'] ?? 0),
+        (float) ($data['height'] ?? 0),
+      ),
+    ];
+  }
+
   /**
    * Applies 12% GST to a per-box price.
    */
@@ -84,6 +124,57 @@ class PricingCalculator {
       'gst' => $gst,
       'final' => $final,
     ];
+  }
+
+  /**
+   * Formats an amount with Indian digit grouping.
+   */
+  public static function formatIndianNumber(float|int|string $amount, int $decimals = 2): string {
+    $amount = (float) $amount;
+    $negative = $amount < 0;
+    $formatted = number_format(abs($amount), $decimals, '.', '');
+    $parts = explode('.', $formatted);
+    $integer = $parts[0];
+    $fraction = $parts[1] ?? '';
+
+    if (strlen($integer) > 3) {
+      $last_three = substr($integer, -3);
+      $leading = substr($integer, 0, -3);
+      $leading = preg_replace('/\B(?=(\d{2})+(?!\d))/', ',', $leading);
+      $integer = $leading . ',' . $last_three;
+    }
+
+    return ($negative ? '-' : '') . $integer . ($decimals > 0 ? '.' . $fraction : '');
+  }
+
+  /**
+   * Formats a rupee amount with Indian digit grouping.
+   */
+  public static function formatIndianCurrency(float|int|string $amount, int $decimals = 2): string {
+    return '₹' . self::formatIndianNumber($amount, $decimals);
+  }
+
+  /**
+   * Calculates the outside surface area of a rectangular box in square inches.
+   */
+  public function calculateBoxSurfaceArea(float $length, float $width, float $height): float {
+    if ($length <= 0 || $width <= 0 || $height <= 0) {
+      return 0.0;
+    }
+    return round(2 * (($length * $width) + ($length * $height) + ($width * $height)), 2);
+  }
+
+  /**
+   * Scales slab prices by size against the seeded reference box.
+   */
+  public function calculateDimensionMultiplier(float $length, float $width, float $height): float {
+    $area = $this->calculateBoxSurfaceArea($length, $width, $height);
+    if ($area <= 0) {
+      return 1.0;
+    }
+
+    $reference_area = $this->calculateBoxSurfaceArea(self::REFERENCE_LENGTH, self::REFERENCE_WIDTH, self::REFERENCE_HEIGHT);
+    return round($area / $reference_area, 4);
   }
 
   /**

@@ -18,6 +18,9 @@ class PdfGenerator {
 
   public function generateQuotePdf(array $data): string {
     $logo_path = DRUPAL_ROOT . '/core/misc/druplicon.png';
+    foreach (['base_price', 'gst', 'final_price', 'total_without_gst', 'total_with_gst'] as $field) {
+      $data[$field] = PricingCalculator::formatIndianNumber($data[$field] ?? 0);
+    }
 
     $build = [
       '#theme' => 'quote_pdf',

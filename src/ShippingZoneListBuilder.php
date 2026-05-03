@@ -15,7 +15,7 @@ class ShippingZoneListBuilder extends ConfigEntityListBuilder {
 
   public function buildRow(EntityInterface $entity): array {
     $row['label'] = $entity->label();
-    $row['cost'] = '₹' . number_format((float) $entity->get('cost'), 2);
+    $row['cost'] = PricingCalculator::formatIndianCurrency($entity->get('cost'));
     $row['delivery'] = $entity->get('delivery_days') . ' days';
     return $row + parent::buildRow($entity);
   }

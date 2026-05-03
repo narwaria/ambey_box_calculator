@@ -20,7 +20,7 @@ class PricingListBuilder extends ConfigEntityListBuilder {
     $row['shape'] = $entity->get('shape');
     $row['board'] = $entity->get('board_grade');
     $row['quantity'] = $entity->get('quantity_from') . ' - ' . $entity->get('quantity_to');
-    $row['price'] = '₹' . number_format((float) $entity->get('price_per_box'), 2);
+    $row['price'] = PricingCalculator::formatIndianCurrency($entity->get('price_per_box'));
     return $row + parent::buildRow($entity);
   }
 }

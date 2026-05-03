@@ -216,22 +216,55 @@
   left: 58px;
   width: 34px;
   height: 34px;
-  color: #101828;
-  font-size: 1.85rem;
-  line-height: 1;
+  background: #101828;
   opacity: 0.78;
+  content: "";
+  -webkit-mask: var(--ag-field-icon) center / 30px 30px no-repeat;
+  mask: var(--ag-field-icon) center / 30px 30px no-repeat;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 30px 30px;
 }
 
-.ambey-size-fields::before { content: "□"; }
-.ambey-board-field::before { content: "▤"; }
-.ambey-color-field::before { content: "◌"; }
-.ambey-shape-field::before { content: "◇"; }
-.ambey-print-field::before { content: "▣"; }
-.ambey-quality-field::before { content: "◎"; }
-.ambey-coating-field::before { content: "◊"; }
-.ambey-shipping-field::before { content: "▱"; }
-.ambey-quantity-field::before { content: "#"; }
-.ambey-customer-fields::before { content: "○"; }
+.ambey-size-fields::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 9h24v16H5zM5 7v4M29 7v4M5 23v4M29 23v4M9 5h16M9 29h16' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.ambey-board-field::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 9h18M8 17h18M8 25h18M11 9v16M23 9v16' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.ambey-color-field::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17 5a12 12 0 0 0 0 24h1.5a3 3 0 0 0 0-6H17a3 3 0 0 1 0-6h2a10 10 0 0 0-2-12zM11 15h.1M14 10h.1M21 11h.1' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.ambey-shape-field::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17 5 29 13v13L17 31 5 26V13zM5 13l12 6 12-6M17 19v12' fill='none' stroke='black' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.ambey-print-field::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 5h14v7H10zM9 23H7a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3h20a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-2M10 20h14v9H10zM25 16h.1' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.ambey-quality-field::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m17 4 3.4 7 7.6 1.1-5.5 5.4 1.3 7.5L17 21.4 10.2 25l1.3-7.5L6 12.1l7.6-1.1z' fill='none' stroke='black' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.ambey-coating-field::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17 4l2.4 7.6L27 14l-7.6 2.4L17 24l-2.4-7.6L7 14l7.6-2.4zM25 22l1.2 3.8L30 27l-3.8 1.2L25 32l-1.2-3.8L20 27l3.8-1.2z' fill='none' stroke='black' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.ambey-shipping-field::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 10h17v13H4zM21 15h5l4 4v4h-9zM10 26a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM25 26a3 3 0 1 0 0-6 3 3 0 0 0 0 6z' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.ambey-quantity-field::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 8h14M10 17h14M10 26h14M5 8h.1M5 17h.1M5 26h.1' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.ambey-customer-fields::before {
+  --ag-field-icon: url("data:image/svg+xml,%3Csvg width='34' height='34' viewBox='0 0 34 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M17 17a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM6 30a11 11 0 0 1 22 0' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E");
+}
 
 .ambey-calculator .fieldset-wrapper {
   display: grid;
@@ -307,6 +340,7 @@
 }
 
 .ambey-coating-field .fieldset-wrapper > div:first-of-type {
+  align-items: stretch;
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
@@ -423,11 +457,19 @@ label[for="edit-coating-emboss"]::after { content: "Raised pattern finishing"; }
 }
 
 .ambey-coating-field label.option {
-  min-height: 70px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   padding: 12px 32px 10px 12px;
   color: #798496;
   background: #fafafa;
   font-size: 0.8rem;
+}
+
+.ambey-coating-field .form-type-radio {
+  display: flex;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
 }
 
 .ambey-coating-field .fieldset-wrapper > .description {

@@ -2,6 +2,7 @@
 
 namespace Drupal\ambey_box_calculator\Form;
 
+use Drupal\ambey_box_calculator\PricingCalculator;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -18,14 +19,6 @@ class BoxCalculatorForm extends FormBase {
   ];
 
   private const DEFAULT_QUANTITY = 500;
-
-  private const DEFAULT_CUSTOMER = [
-    'name' => 'Test Customer',
-    'email' => 'test@example.com',
-    'phone' => '9999999999',
-    'company' => 'Ambey Global',
-    'message' => '',
-  ];
 
   public function getFormId(): string {
     return 'ambey_box_calculator_form';
@@ -154,30 +147,29 @@ class BoxCalculatorForm extends FormBase {
     $form['customer']['name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Full Name'),
-      '#default_value' => self::DEFAULT_CUSTOMER['name'],
       '#required' => TRUE,
+      '#attributes' => ['placeholder' => $this->t('Enter your full name')],
     ];
     $form['customer']['email'] = [
       '#type' => 'email',
       '#title' => $this->t('Email'),
-      '#default_value' => self::DEFAULT_CUSTOMER['email'],
       '#required' => TRUE,
+      '#attributes' => ['placeholder' => $this->t('Enter your email address')],
     ];
     $form['customer']['phone'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Phone Number'),
-      '#default_value' => self::DEFAULT_CUSTOMER['phone'],
       '#required' => TRUE,
+      '#attributes' => ['placeholder' => $this->t('Enter your phone number')],
     ];
     $form['customer']['company'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Company Name'),
-      '#default_value' => self::DEFAULT_CUSTOMER['company'],
+      '#attributes' => ['placeholder' => $this->t('Enter your company name')],
     ];
     $form['customer']['message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Message / Requirement'),
-      '#default_value' => self::DEFAULT_CUSTOMER['message'],
       '#rows' => 3,
       '#attributes' => ['placeholder' => $this->t('Enter any specific requirement...')],
     ];
@@ -261,8 +253,7 @@ class BoxCalculatorForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $data = $this->extractData($form_state);
     $pricing = \Drupal::service('ambey_box_calculator.pricing');
-    $base_price = $this->calculateBasePrice($form_state);
-    $gst_result = $pricing->applyGST($base_price);
+    $prices = $pricing->calculateQuotePrices($data);
     $quantity = (int) $data['quantity'];
 
     $quote_data = [
@@ -284,11 +275,11 @@ class BoxCalculatorForm extends FormBase {
       'shipping_zone' => $data['shipping'],
       'quantity' => $quantity,
       'description' => $data['message'],
-      'base_price' => $gst_result['base'],
-      'gst' => $gst_result['gst'],
-      'final_price' => $gst_result['final'],
-      'total_without_gst' => round($gst_result['base'] * $quantity, 2),
-      'total_with_gst' => round($gst_result['final'] * $quantity, 2),
+      'base_price' => $prices['base_price'],
+      'gst' => $prices['gst'],
+      'final_price' => $prices['final_price'],
+      'total_without_gst' => $prices['total_without_gst'],
+      'total_with_gst' => $prices['total_with_gst'],
     ];
 
     $quote_id = \Drupal::service('ambey_box_calculator.quote')->saveQuote($quote_data);
@@ -303,24 +294,23 @@ class BoxCalculatorForm extends FormBase {
   private function buildPricingPanel(array &$form, FormStateInterface $form_state): void {
     $data = $this->extractData($form_state);
     $quantity = (int) $data['quantity'];
-    $base_price = $this->calculateBasePrice($form_state);
-    $result = \Drupal::service('ambey_box_calculator.pricing')->applyGST($base_price);
+    $result = \Drupal::service('ambey_box_calculator.pricing')->calculateQuotePrices($data);
 
     $form['pricing']['title'] = ['#markup' => '<h3>Quotation Summary</h3>'];
     $form['pricing']['selected'] = [
       '#markup' => '<div class="ambey-selected-box"><div class="ambey-mini-box"></div><div><strong>Selected Box</strong><span>' . Html::escape($data['length'] . ' × ' . $data['width'] . ' × ' . $data['height'] . ' in') . '</span><span>' . Html::escape($data['board_grade'] . ' | ' . $data['shape']) . '</span><span>' . Html::escape($data['color'] . ' | ' . $data['print']) . '</span><span>' . $this->t('Quantity: @quantity', ['@quantity' => $quantity]) . '</span></div></div>',
     ];
-    if ($base_price <= 0) {
+    if ($result['base_price'] <= 0) {
       $form['pricing']['warning'] = ['#markup' => '<div class="ambey-price-empty">Choose a priced shape, board grade, shipping zone, and quantity.</div>'];
       return;
     }
 
     $form['pricing']['quantity'] = ['#markup' => '<div class="ambey-price-row"><span>Quantity</span><strong>' . $quantity . '</strong></div>'];
-    $form['pricing']['base'] = ['#markup' => '<div class="ambey-price-row"><span>Box Price Without GST</span><strong>₹' . number_format($result['base'], 2) . '</strong></div>'];
-    $form['pricing']['gst'] = ['#markup' => '<div class="ambey-price-row"><span>GST (12%)</span><strong>₹' . number_format($result['gst'], 2) . '</strong></div>'];
-    $form['pricing']['final'] = ['#markup' => '<div class="ambey-price-row"><span>Final Price Per Box</span><strong>₹' . number_format($result['final'], 2) . '</strong></div>'];
+    $form['pricing']['base'] = ['#markup' => '<div class="ambey-price-row"><span>Box Price Without GST</span><strong>' . PricingCalculator::formatIndianCurrency($result['base_price']) . '</strong></div>'];
+    $form['pricing']['gst'] = ['#markup' => '<div class="ambey-price-row"><span>GST (12%)</span><strong>' . PricingCalculator::formatIndianCurrency($result['gst']) . '</strong></div>'];
+    $form['pricing']['final'] = ['#markup' => '<div class="ambey-price-row"><span>Final Price Per Box</span><strong>' . PricingCalculator::formatIndianCurrency($result['final_price']) . '</strong></div>'];
     if ($quantity > 0) {
-      $form['pricing']['total'] = ['#markup' => '<div class="ambey-price-total"><span>Total With GST</span><strong>₹' . number_format($result['final'] * $quantity, 2) . '</strong></div>'];
+      $form['pricing']['total'] = ['#markup' => '<div class="ambey-price-total"><span>Total With GST</span><strong>' . PricingCalculator::formatIndianCurrency($result['total_with_gst']) . '</strong></div>'];
     }
     $form['pricing']['trust'] = ['#markup' => '<div class="ambey-trust-list"><div><strong>Best Price Guarantee</strong><span>Get competitive prices instantly.</span></div><div><strong>Secure & Reliable</strong><span>Your information is safe with us.</span></div><div><strong>Quick Response</strong><span>We will get back within 24 hours.</span></div></div>'];
   }
@@ -337,7 +327,10 @@ class BoxCalculatorForm extends FormBase {
       (string) $data['print'],
       (string) $data['coating'],
       (string) $data['color'],
-      (string) $data['shipping']
+      (string) $data['shipping'],
+      (float) $data['length'],
+      (float) $data['width'],
+      (float) $data['height']
     );
   }
 
@@ -354,11 +347,11 @@ class BoxCalculatorForm extends FormBase {
       'quality' => (string) ($form_state->getValue('quality') ?: 'standard'),
       'coating' => (string) $form_state->getValue('coating'),
       'shipping' => (string) ($form_state->getValue('shipping') ?: 'local'),
-      'name' => (string) ($form_state->getValue('name') ?: self::DEFAULT_CUSTOMER['name']),
-      'email' => (string) ($form_state->getValue('email') ?: self::DEFAULT_CUSTOMER['email']),
-      'phone' => (string) ($form_state->getValue('phone') ?: self::DEFAULT_CUSTOMER['phone']),
-      'company' => (string) ($form_state->getValue('company') ?: self::DEFAULT_CUSTOMER['company']),
-      'message' => (string) ($form_state->getValue('message') ?: self::DEFAULT_CUSTOMER['message']),
+      'name' => (string) $form_state->getValue('name'),
+      'email' => (string) $form_state->getValue('email'),
+      'phone' => (string) $form_state->getValue('phone'),
+      'company' => (string) $form_state->getValue('company'),
+      'message' => (string) $form_state->getValue('message'),
     ];
   }
 
@@ -385,10 +378,9 @@ class BoxCalculatorForm extends FormBase {
 
   private function getShapeOptions(): array {
     $options = [];
-    $available_shapes = \Drupal::service('ambey_box_calculator.pricing')->getAvailableShapes();
     $entities = \Drupal::entityTypeManager()->getStorage('ambey_shape')->loadMultiple();
     foreach ($entities as $entity) {
-      if ($entity->get('enabled') && in_array($entity->id(), $available_shapes, TRUE)) {
+      if ($entity->get('enabled')) {
         $options[$entity->id()] = $entity->label();
       }
     }

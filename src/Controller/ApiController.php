@@ -66,8 +66,8 @@ class ApiController extends ControllerBase {
       'base_price' => $prices['base_price'],
       'gst' => $prices['gst'],
       'final_price' => $prices['final_price'],
-      'total_without_gst' => round($prices['base_price'] * $quantity, 2),
-      'total_with_gst' => round($prices['final_price'] * $quantity, 2),
+      'total_without_gst' => $prices['total_without_gst'],
+      'total_with_gst' => $prices['total_with_gst'],
     ];
     $quote_id = \Drupal::service('ambey_box_calculator.quote')->saveQuote($quote_data);
     $quote_data['id'] = $quote_id;
@@ -86,18 +86,7 @@ class ApiController extends ControllerBase {
   }
 
   private function calculatePrices(array $data): array {
-    $pricing = \Drupal::service('ambey_box_calculator.pricing');
-    $base = $pricing->getPriceWithAddons(
-      (string) ($data['shape'] ?? ''),
-      (string) ($data['board_grade'] ?? ''),
-      (int) ($data['quantity'] ?? 0),
-      (string) ($data['print'] ?? 'none'),
-      (string) ($data['coating'] ?? ''),
-      (string) ($data['color'] ?? 'brown'),
-      (string) ($data['shipping'] ?? $data['shipping_zone'] ?? '')
-    );
-    $gst = $pricing->applyGST($base);
-    return ['base_price' => $gst['base'], 'gst' => $gst['gst'], 'final_price' => $gst['final']];
+    return \Drupal::service('ambey_box_calculator.pricing')->calculateQuotePrices($data);
   }
 
   private function decodeJson(Request $request): array {

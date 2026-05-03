@@ -16,6 +16,9 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *       "add" = "Drupal\ambey_box_calculator\Form\ShapeForm",
  *       "edit" = "Drupal\ambey_box_calculator\Form\ShapeForm",
  *       "delete" = "Drupal\ambey_box_calculator\Form\ShapeDeleteForm"
+ *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider"
  *     }
  *   },
  *   config_prefix = "shape",

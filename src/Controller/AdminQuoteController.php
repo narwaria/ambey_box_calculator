@@ -2,6 +2,7 @@
 
 namespace Drupal\ambey_box_calculator\Controller;
 
+use Drupal\ambey_box_calculator\PricingCalculator;
 use Drupal\ambey_box_calculator\QuoteStorage;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
@@ -37,7 +38,7 @@ class AdminQuoteController extends ControllerBase {
         'assigned_to' => $assigned_to,
         'date' => date('d M Y H:i', (int) $row['created']),
         'changed' => !empty($row['changed']) ? date('d M Y H:i', (int) $row['changed']) : '',
-        'price' => '₹' . number_format((float) $row['total_with_gst'], 2),
+        'price' => PricingCalculator::formatIndianCurrency($row['total_with_gst']),
         'view' => Url::fromRoute('ambey_box_calculator.quote_detail', ['quote_id' => $row['uuid']])->toString(),
         'download' => Url::fromRoute('ambey_box_calculator.download', ['quote_id' => $row['uuid']])->toString(),
       ];

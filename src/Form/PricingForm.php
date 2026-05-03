@@ -11,12 +11,43 @@ class PricingForm extends EntityForm {
     $entity = $this->entity;
     $form['label'] = ['#type' => 'textfield', '#title' => $this->t('Label'), '#default_value' => $entity->label(), '#required' => TRUE];
     $form['id'] = ['#type' => 'machine_name', '#default_value' => $entity->id(), '#machine_name' => ['exists' => '\\Drupal\\ambey_box_calculator\\Entity\\Pricing::load']];
-    $form['shape'] = ['#type' => 'textfield', '#title' => $this->t('Shape'), '#default_value' => $entity->get('shape'), '#required' => TRUE];
-    $form['board_grade'] = ['#type' => 'textfield', '#title' => $this->t('Board Grade'), '#default_value' => $entity->get('board_grade'), '#required' => TRUE];
+    $form['shape'] = ['#type' => 'select', '#title' => $this->t('Shape'), '#options' => $this->getShapeOptions((string) $entity->get('shape')), '#default_value' => $entity->get('shape') ?: 'regular', '#required' => TRUE];
+    $form['board_grade'] = ['#type' => 'select', '#title' => $this->t('Board Grade'), '#options' => $this->getBoardGradeOptions(), '#default_value' => $entity->get('board_grade') ?: '3ply', '#required' => TRUE];
     $form['quantity_from'] = ['#type' => 'number', '#title' => $this->t('Quantity From'), '#default_value' => $entity->get('quantity_from'), '#min' => 1, '#required' => TRUE];
     $form['quantity_to'] = ['#type' => 'number', '#title' => $this->t('Quantity To'), '#default_value' => $entity->get('quantity_to'), '#min' => 1, '#required' => TRUE];
     $form['price_per_box'] = ['#type' => 'number', '#title' => $this->t('Price Per Box'), '#step' => 0.01, '#min' => 0, '#default_value' => $entity->get('price_per_box'), '#required' => TRUE];
     return parent::buildForm($form, $form_state);
+  }
+
+  private function getShapeOptions(string $current_shape = ''): array {
+    $options = [];
+    $entities = \Drupal::entityTypeManager()->getStorage('ambey_shape')->loadMultiple();
+    foreach ($entities as $entity) {
+      if ($entity->get('enabled') || $entity->id() === $current_shape) {
+        $options[$entity->id()] = $entity->label();
+      }
+    }
+
+    if ($current_shape !== '' && !isset($options[$current_shape])) {
+      $options[$current_shape] = $current_shape;
+    }
+
+    return $options ?: ['regular' => $this->t('Regular Box')];
+  }
+
+  private function getBoardGradeOptions(): array {
+    $options = [
+      'mono' => $this->t('Mono Carton'),
+      '3ply' => $this->t('3 Ply'),
+      '5ply' => $this->t('5 Ply'),
+      '7ply' => $this->t('7 Ply'),
+    ];
+
+    foreach (\Drupal::service('ambey_box_calculator.pricing')->getAvailableBoardGrades() as $id) {
+      $options[$id] ??= $id;
+    }
+
+    return $options;
   }
 
   public function validateForm(array &$form, FormStateInterface $form_state): void {

@@ -16,6 +16,9 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *       "add" = "Drupal\ambey_box_calculator\Form\ShippingZoneForm",
  *       "edit" = "Drupal\ambey_box_calculator\Form\ShippingZoneForm",
  *       "delete" = "Drupal\ambey_box_calculator\Form\ShippingZoneDeleteForm"
+ *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider"
  *     }
  *   },
  *   config_prefix = "shipping_zone",

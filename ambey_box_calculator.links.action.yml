@@ -1,0 +1,17 @@
+entity.ambey_shape.add_form:
+  route_name: entity.ambey_shape.add_form
+  title: 'Add shape'
+  appears_on:
+    - entity.ambey_shape.collection
+
+entity.ambey_pricing.add_form:
+  route_name: entity.ambey_pricing.add_form
+  title: 'Add pricing slab'
+  appears_on:
+    - entity.ambey_pricing.collection
+
+entity.ambey_shipping_zone.add_form:
+  route_name: entity.ambey_shipping_zone.add_form
+  title: 'Add shipping zone'
+  appears_on:
+    - entity.ambey_shipping_zone.collection

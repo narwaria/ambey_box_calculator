@@ -16,6 +16,9 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *       "add" = "Drupal\ambey_box_calculator\Form\PricingForm",
  *       "edit" = "Drupal\ambey_box_calculator\Form\PricingForm",
  *       "delete" = "Drupal\ambey_box_calculator\Form\PricingDeleteForm"
+ *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider"
  *     }
  *   },
  *   config_prefix = "pricing",
@@ -31,7 +34,10 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "board_grade",
  *     "quantity_from",
  *     "quantity_to",
- *     "price_per_box"
+ *     "price_per_box",
+ *     "print_single_cost",
+ *     "print_multi_cost",
+ *     "coating_cost"
  *   },
  *   links = {
  *     "collection" = "/admin/config/ambey/pricing",
@@ -49,4 +55,7 @@ class Pricing extends ConfigEntityBase implements PricingInterface {
   public int $quantity_from = 1;
   public int $quantity_to = 999999;
   public float $price_per_box = 0.0;
+  public float $print_single_cost = 0.0;
+  public float $print_multi_cost = 0.0;
+  public float $coating_cost = 0.0;
 }
