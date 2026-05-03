@@ -4,4 +4,7 @@ shape: regular
 board_grade: 3ply
 quantity_from: 500
 quantity_to: 999
+reference_length: 10
+reference_width: 8
+reference_height: 5
 price_per_box: 15.11

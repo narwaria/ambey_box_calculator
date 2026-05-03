@@ -53,11 +53,13 @@ Per-box pricing is calculated in this order:
 surface area = 2 * ((length * width) + (length * height) + (width * height))
 ```
 
-3. Compare that area to the seeded reference box `10 x 8 x 5 in`:
+3. Compare that area to the pricing slab's configured reference box size:
 
 ```text
 dimension multiplier = entered surface area / reference surface area
 ```
+
+The reference box size is managed from Box Pricing using `Reference Length (L)`, `Reference Width (W)`, and `Reference Height (H)`. Existing rows default to `10 x 8 x 5 in`.
 
 4. Apply the board grade material factor:
 
@@ -113,11 +115,12 @@ curl -X POST https://example.com/api/box/quote \
 
 ## Admin
 
-- Quotes dashboard: `/admin/ambey/quotes`
-- Pricing slabs: `/admin/structure/ambey-pricing`
-- Shapes: `/admin/structure/ambey-shapes`
-- Shipping zones: `/admin/structure/ambey-shipping-zones`
-- CRM settings: `/admin/config/ambey/crm`
+- Quotes dashboard: `/admin/quotes`
+- Global settings: `/admin/config/box-calculator/settings`
+- Pricing slabs: `/admin/config/box-calculator/pricing`
+- Shapes: `/admin/config/box-calculator/shapes`
+- Shipping zones: `/admin/config/box-calculator/shipping`
+- CRM settings: `/admin/config/box-calculator/crm`
 
 ## Verification
 

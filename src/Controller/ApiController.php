@@ -47,6 +47,7 @@ class ApiController extends ControllerBase {
       ], 400);
     }
     $quantity = (int) $data['quantity'];
+    $settings = $this->config('ambey_box_calculator.settings');
     $quote_data = [
       'created' => time(),
       'name' => $data['name'],
@@ -57,11 +58,11 @@ class ApiController extends ControllerBase {
       'length' => (float) $data['length'],
       'width' => (float) $data['width'],
       'height' => (float) $data['height'],
-      'color' => $data['color'] ?? 'brown',
-      'print_type' => $data['print'] ?? 'none',
-      'quality' => $data['quality'] ?? 'standard',
+      'color' => $data['color'] ?? $settings->get('default_color') ?? 'brown',
+      'print_type' => $data['print'] ?? $settings->get('default_print') ?? 'none',
+      'quality' => $data['quality'] ?? $settings->get('default_quality') ?? 'standard',
       'coating' => $data['coating'] ?? '',
-      'shipping_zone' => $data['shipping'] ?? $data['shipping_zone'] ?? '',
+      'shipping_zone' => $data['shipping'] ?? $data['shipping_zone'] ?? $settings->get('default_shipping') ?? '',
       'quantity' => $quantity,
       'base_price' => $prices['base_price'],
       'gst' => $prices['gst'],

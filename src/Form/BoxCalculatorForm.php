@@ -35,6 +35,7 @@ class BoxCalculatorForm extends FormBase {
     $board_options = $this->getBoardGradeOptions();
     $shape_options = $this->getShapeOptions();
     $shipping_options = $this->getShippingOptions();
+    $settings = $this->config('ambey_box_calculator.settings');
 
     $form['size'] = [
       '#type' => 'fieldset',
@@ -49,7 +50,7 @@ class BoxCalculatorForm extends FormBase {
         '#required' => TRUE,
         '#step' => 0.1,
         '#min' => 0.1,
-        '#default_value' => self::DEFAULT_DIMENSIONS[$key],
+        '#default_value' => $settings->get('default_' . $key) ?? self::DEFAULT_DIMENSIONS[$key],
         '#ajax' => ['callback' => '::updatePriceAjax', 'event' => 'change', 'wrapper' => 'price-wrapper'],
       ];
     }
@@ -59,7 +60,7 @@ class BoxCalculatorForm extends FormBase {
       '#title' => $this->t('Board grade'),
       '#description' => $this->t('Choose the corrugated board strength for this box.'),
       '#options' => $this->decorateBoardOptions($board_options),
-      '#default_value' => isset($board_options['3ply']) ? '3ply' : array_key_first($board_options),
+      '#default_value' => $this->optionDefault($board_options, (string) ($settings->get('default_board_grade') ?? '3ply')),
       '#required' => TRUE,
       '#attributes' => ['class' => ['ambey-choice-group', 'ambey-step-field', 'ambey-board-field']],
       '#ajax' => ['callback' => '::updatePriceAjax', 'event' => 'change', 'wrapper' => 'price-wrapper'],
@@ -70,7 +71,7 @@ class BoxCalculatorForm extends FormBase {
       '#title' => $this->t('Colour of box'),
       '#description' => $this->t('Please select the colour of the outer paper of your box.'),
       '#options' => ['brown' => $this->t('Brown Kraft'), 'white' => $this->t('White')],
-      '#default_value' => 'brown',
+      '#default_value' => (string) ($settings->get('default_color') ?? 'brown'),
       '#required' => TRUE,
       '#attributes' => ['class' => ['ambey-choice-group', 'ambey-step-field', 'ambey-color-field']],
       '#ajax' => ['callback' => '::updatePriceAjax', 'event' => 'change', 'wrapper' => 'price-wrapper'],
@@ -81,7 +82,7 @@ class BoxCalculatorForm extends FormBase {
       '#title' => $this->t('Shape of box'),
       '#description' => $this->t('Please select the shape of your box.'),
       '#options' => $this->decorateShapeOptions($shape_options),
-      '#default_value' => isset($shape_options['regular']) ? 'regular' : array_key_first($shape_options),
+      '#default_value' => $this->optionDefault($shape_options, (string) ($settings->get('default_shape') ?? 'regular')),
       '#required' => TRUE,
       '#attributes' => ['class' => ['ambey-choice-group', 'ambey-step-field', 'ambey-shape-field']],
       '#ajax' => ['callback' => '::updatePriceAjax', 'event' => 'change', 'wrapper' => 'price-wrapper'],
@@ -92,7 +93,7 @@ class BoxCalculatorForm extends FormBase {
       '#title' => $this->t('Print'),
       '#description' => $this->t('Indicate if you require any print applying to your box.'),
       '#options' => ['none' => $this->t('No Print'), 'single' => $this->t('Single Colour'), 'multi' => $this->t('Multi Colour (CMYK)')],
-      '#default_value' => 'none',
+      '#default_value' => (string) ($settings->get('default_print') ?? 'none'),
       '#required' => TRUE,
       '#attributes' => ['class' => ['ambey-choice-group', 'ambey-step-field', 'ambey-print-field']],
       '#ajax' => ['callback' => '::updatePriceAjax', 'event' => 'change', 'wrapper' => 'price-wrapper'],
@@ -103,7 +104,7 @@ class BoxCalculatorForm extends FormBase {
       '#title' => $this->t('Quality'),
       '#description' => $this->t('Choose your own quality.'),
       '#options' => ['standard' => $this->t('Standard'), 'premium' => $this->t('Premium'), 'export' => $this->t('Export Quality')],
-      '#default_value' => 'standard',
+      '#default_value' => (string) ($settings->get('default_quality') ?? 'standard'),
       '#required' => TRUE,
       '#attributes' => ['class' => ['ambey-choice-group', 'ambey-step-field', 'ambey-quality-field']],
       '#ajax' => ['callback' => '::updatePriceAjax', 'event' => 'change', 'wrapper' => 'price-wrapper'],
@@ -123,7 +124,7 @@ class BoxCalculatorForm extends FormBase {
       '#type' => 'select',
       '#title' => $this->t('Shipping'),
       '#options' => $shipping_options,
-      '#default_value' => isset($shipping_options['local']) ? 'local' : array_key_first($shipping_options),
+      '#default_value' => $this->optionDefault($shipping_options, (string) ($settings->get('default_shipping') ?? 'local')),
       '#required' => TRUE,
       '#wrapper_attributes' => ['class' => ['ambey-step-field', 'ambey-shipping-field']],
       '#ajax' => ['callback' => '::updatePriceAjax', 'event' => 'change', 'wrapper' => 'price-wrapper'],
@@ -134,7 +135,7 @@ class BoxCalculatorForm extends FormBase {
       '#title' => $this->t('Quantity'),
       '#required' => TRUE,
       '#min' => 1,
-      '#default_value' => self::DEFAULT_QUANTITY,
+      '#default_value' => (int) ($settings->get('default_quantity') ?? self::DEFAULT_QUANTITY),
       '#wrapper_attributes' => ['class' => ['ambey-step-field', 'ambey-quantity-field']],
       '#ajax' => ['callback' => '::updatePriceAjax', 'event' => 'change', 'wrapper' => 'price-wrapper'],
     ];
@@ -335,24 +336,32 @@ class BoxCalculatorForm extends FormBase {
   }
 
   private function extractData(FormStateInterface $form_state): array {
+    $settings = $this->config('ambey_box_calculator.settings');
     return [
-      'length' => (float) ($form_state->getValue('length') ?: self::DEFAULT_DIMENSIONS['length']),
-      'width' => (float) ($form_state->getValue('width') ?: self::DEFAULT_DIMENSIONS['width']),
-      'height' => (float) ($form_state->getValue('height') ?: self::DEFAULT_DIMENSIONS['height']),
-      'quantity' => (int) ($form_state->getValue('quantity') ?: self::DEFAULT_QUANTITY),
-      'board_grade' => (string) ($form_state->getValue('board_grade') ?: '3ply'),
-      'color' => (string) ($form_state->getValue('color') ?: 'brown'),
-      'shape' => (string) ($form_state->getValue('shape') ?: 'regular'),
-      'print' => (string) ($form_state->getValue('print') ?: 'none'),
-      'quality' => (string) ($form_state->getValue('quality') ?: 'standard'),
+      'length' => (float) ($form_state->getValue('length') ?: ($settings->get('default_length') ?? self::DEFAULT_DIMENSIONS['length'])),
+      'width' => (float) ($form_state->getValue('width') ?: ($settings->get('default_width') ?? self::DEFAULT_DIMENSIONS['width'])),
+      'height' => (float) ($form_state->getValue('height') ?: ($settings->get('default_height') ?? self::DEFAULT_DIMENSIONS['height'])),
+      'quantity' => (int) ($form_state->getValue('quantity') ?: ($settings->get('default_quantity') ?? self::DEFAULT_QUANTITY)),
+      'board_grade' => (string) ($form_state->getValue('board_grade') ?: ($settings->get('default_board_grade') ?? '3ply')),
+      'color' => (string) ($form_state->getValue('color') ?: ($settings->get('default_color') ?? 'brown')),
+      'shape' => (string) ($form_state->getValue('shape') ?: ($settings->get('default_shape') ?? 'regular')),
+      'print' => (string) ($form_state->getValue('print') ?: ($settings->get('default_print') ?? 'none')),
+      'quality' => (string) ($form_state->getValue('quality') ?: ($settings->get('default_quality') ?? 'standard')),
       'coating' => (string) $form_state->getValue('coating'),
-      'shipping' => (string) ($form_state->getValue('shipping') ?: 'local'),
+      'shipping' => (string) ($form_state->getValue('shipping') ?: ($settings->get('default_shipping') ?? 'local')),
       'name' => (string) $form_state->getValue('name'),
       'email' => (string) $form_state->getValue('email'),
       'phone' => (string) $form_state->getValue('phone'),
       'company' => (string) $form_state->getValue('company'),
       'message' => (string) $form_state->getValue('message'),
     ];
+  }
+
+  private function optionDefault(array $options, string $preferred): string {
+    if ($preferred !== '' && isset($options[$preferred])) {
+      return $preferred;
+    }
+    return (string) array_key_first($options);
   }
 
   private function decorateBoardOptions(array $options): array {

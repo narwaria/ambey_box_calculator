@@ -31,6 +31,9 @@ manage ambey shipping:
 manage ambey crm settings:
   title: 'Manage CRM settings'
   description: 'Allows configuring CRM integration.'
+manage ambey calculator settings:
+  title: 'Manage calculator settings'
+  description: 'Allows configuring calculator defaults and global pricing rules.'
 view ambey logs:
   title: 'View Ambey calculator logs'
   description: 'Allows viewing calculator related logs.'

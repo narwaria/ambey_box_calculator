@@ -1,0 +1,21 @@
+default_length: 10
+default_width: 8
+default_height: 5
+default_quantity: 500
+default_board_grade: '3ply'
+default_color: 'brown'
+default_shape: 'regular'
+default_print: 'none'
+default_quality: 'standard'
+default_shipping: 'local'
+gst_rate: 0.12
+price_cache_lifetime: 3600
+single_print_min_quantity: 500
+multi_print_min_quantity: 3000
+coating_allowed_color: 'white'
+pdf_logo_path: ''
+board_grade_factors:
+  mono: 0.75
+  3ply: 1
+  5ply: 1.75
+  7ply: 2.5

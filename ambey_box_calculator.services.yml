@@ -15,9 +15,12 @@ services:
       - '@cache.ambey_pricing'
       - '@entity_type.manager'
       - '@logger.channel.ambey_box_calculator'
+      - '@config.factory'
 
   ambey_box_calculator.rules:
     class: Drupal\ambey_box_calculator\BusinessRuleValidator
+    arguments:
+      - '@config.factory'
 
   ambey_box_calculator.quote:
     class: Drupal\ambey_box_calculator\QuoteStorage
@@ -30,6 +33,7 @@ services:
     arguments:
       - '@renderer'
       - '@extension.list.module'
+      - '@config.factory'
 
   ambey_box_calculator.crm:
     class: Drupal\ambey_box_calculator\CrmIntegrationService

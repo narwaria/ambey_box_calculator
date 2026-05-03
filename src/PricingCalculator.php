@@ -3,6 +3,7 @@
 namespace Drupal\ambey_box_calculator;
 
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -26,6 +27,7 @@ class PricingCalculator {
     protected CacheBackendInterface $cache,
     protected EntityTypeManagerInterface $entityTypeManager,
     protected LoggerInterface $logger,
+    protected ConfigFactoryInterface $configFactory,
   ) {}
 
   /**
@@ -36,9 +38,8 @@ class PricingCalculator {
       return 0.0;
     }
 
-    $dimension_multiplier = $this->calculateDimensionMultiplier($length, $width, $height);
     $board_factor = $this->getBoardGradeFactor($board);
-    $cache_key = 'price:' . hash('sha256', implode('|', [$shape, $board, $quantity, $print, $coating, $color, $shipping_zone, $dimension_multiplier, $board_factor]));
+    $cache_key = 'price:' . hash('sha256', implode('|', [$shape, $board, $quantity, $print, $coating, $color, $shipping_zone, $length, $width, $height, $board_factor]));
     if ($cache = $this->cache->get($cache_key)) {
       return (float) $cache->data;
     }
@@ -53,6 +54,14 @@ class PricingCalculator {
       return 0.0;
     }
 
+    $dimension_multiplier = $this->calculateDimensionMultiplier(
+      $length,
+      $width,
+      $height,
+      (float) ($row['reference_length'] ?? self::REFERENCE_LENGTH),
+      (float) ($row['reference_width'] ?? self::REFERENCE_WIDTH),
+      (float) ($row['reference_height'] ?? self::REFERENCE_HEIGHT),
+    );
     $price = (float) $row['price_per_box'] * $dimension_multiplier * $board_factor;
 
     if ($print === 'single') {
@@ -71,7 +80,8 @@ class PricingCalculator {
     }
 
     $price = round($price, 2);
-    $this->cache->set($cache_key, $price, time() + 3600, ['ambey_pricing']);
+    $cache_lifetime = (int) ($this->settings()->get('price_cache_lifetime') ?? 3600);
+    $this->cache->set($cache_key, $price, time() + $cache_lifetime, ['ambey_pricing']);
 
     $this->logger->debug('Price calculated: Shape=@shape Board=@board Qty=@qty Price=@price', [
       '@shape' => $shape,
@@ -85,19 +95,28 @@ class PricingCalculator {
 
   public function calculateQuotePrices(array $data): array {
     $quantity = (int) ($data['quantity'] ?? 0);
-    $base = $this->getPriceWithAddons(
-      (string) ($data['shape'] ?? ''),
-      (string) ($data['board_grade'] ?? ''),
+    $settings = $this->settings();
+    $pricing_row = $this->loadPricingRow(
+      (string) ($data['shape'] ?? $settings->get('default_shape') ?? ''),
+      (string) ($data['board_grade'] ?? $settings->get('default_board_grade') ?? ''),
       $quantity,
-      (string) ($data['print'] ?? $data['print_type'] ?? 'none'),
+    );
+    $base = $this->getPriceWithAddons(
+      (string) ($data['shape'] ?? $settings->get('default_shape') ?? ''),
+      (string) ($data['board_grade'] ?? $settings->get('default_board_grade') ?? ''),
+      $quantity,
+      (string) ($data['print'] ?? $data['print_type'] ?? $settings->get('default_print') ?? 'none'),
       (string) ($data['coating'] ?? ''),
-      (string) ($data['color'] ?? 'brown'),
-      (string) ($data['shipping'] ?? $data['shipping_zone'] ?? ''),
-      (float) ($data['length'] ?? 0),
-      (float) ($data['width'] ?? 0),
-      (float) ($data['height'] ?? 0),
+      (string) ($data['color'] ?? $settings->get('default_color') ?? 'brown'),
+      (string) ($data['shipping'] ?? $data['shipping_zone'] ?? $settings->get('default_shipping') ?? ''),
+      (float) ($data['length'] ?? $settings->get('default_length') ?? 0),
+      (float) ($data['width'] ?? $settings->get('default_width') ?? 0),
+      (float) ($data['height'] ?? $settings->get('default_height') ?? 0),
     );
     $gst = $this->applyGST($base);
+    $reference_length = (float) ($pricing_row['reference_length'] ?? self::REFERENCE_LENGTH);
+    $reference_width = (float) ($pricing_row['reference_width'] ?? self::REFERENCE_WIDTH);
+    $reference_height = (float) ($pricing_row['reference_height'] ?? self::REFERENCE_HEIGHT);
 
     return [
       'base_price' => $gst['base'],
@@ -106,15 +125,22 @@ class PricingCalculator {
       'total_without_gst' => round($gst['base'] * $quantity, 2),
       'total_with_gst' => round($gst['final'] * $quantity, 2),
       'box_area_sq_in' => $this->calculateBoxSurfaceArea(
-        (float) ($data['length'] ?? 0),
-        (float) ($data['width'] ?? 0),
-        (float) ($data['height'] ?? 0),
+        (float) ($data['length'] ?? $settings->get('default_length') ?? 0),
+        (float) ($data['width'] ?? $settings->get('default_width') ?? 0),
+        (float) ($data['height'] ?? $settings->get('default_height') ?? 0),
       ),
-      'board_grade_factor' => $this->getBoardGradeFactor((string) ($data['board_grade'] ?? '')),
+      'reference_length' => $reference_length,
+      'reference_width' => $reference_width,
+      'reference_height' => $reference_height,
+      'reference_area_sq_in' => $this->calculateBoxSurfaceArea($reference_length, $reference_width, $reference_height),
+      'board_grade_factor' => $this->getBoardGradeFactor((string) ($data['board_grade'] ?? $settings->get('default_board_grade') ?? '')),
       'dimension_multiplier' => $this->calculateDimensionMultiplier(
-        (float) ($data['length'] ?? 0),
-        (float) ($data['width'] ?? 0),
-        (float) ($data['height'] ?? 0),
+        (float) ($data['length'] ?? $settings->get('default_length') ?? 0),
+        (float) ($data['width'] ?? $settings->get('default_width') ?? 0),
+        (float) ($data['height'] ?? $settings->get('default_height') ?? 0),
+        $reference_length,
+        $reference_width,
+        $reference_height,
       ),
     ];
   }
@@ -124,7 +150,8 @@ class PricingCalculator {
    */
   public function applyGST(float $base_price): array {
     $base_price = round($base_price, 2);
-    $gst = round($base_price * 0.12, 2);
+    $gst_rate = (float) ($this->settings()->get('gst_rate') ?? 0.12);
+    $gst = round($base_price * $gst_rate, 2);
     $final = round($base_price + $gst, 2);
     return [
       'base' => $base_price,
@@ -174,13 +201,16 @@ class PricingCalculator {
   /**
    * Scales slab prices by size against the seeded reference box.
    */
-  public function calculateDimensionMultiplier(float $length, float $width, float $height): float {
+  public function calculateDimensionMultiplier(float $length, float $width, float $height, float $reference_length = self::REFERENCE_LENGTH, float $reference_width = self::REFERENCE_WIDTH, float $reference_height = self::REFERENCE_HEIGHT): float {
     $area = $this->calculateBoxSurfaceArea($length, $width, $height);
     if ($area <= 0) {
       return 1.0;
     }
 
-    $reference_area = $this->calculateBoxSurfaceArea(self::REFERENCE_LENGTH, self::REFERENCE_WIDTH, self::REFERENCE_HEIGHT);
+    $reference_area = $this->calculateBoxSurfaceArea($reference_length, $reference_width, $reference_height);
+    if ($reference_area <= 0) {
+      return 1.0;
+    }
     return round($area / $reference_area, 4);
   }
 
@@ -188,7 +218,12 @@ class PricingCalculator {
    * Gets the material multiplier for a board grade.
    */
   public function getBoardGradeFactor(string $board): float {
-    return self::BOARD_GRADE_FACTORS[$board] ?? 1.0;
+    $factors = $this->settings()->get('board_grade_factors') ?: self::BOARD_GRADE_FACTORS;
+    return isset($factors[$board]) ? (float) $factors[$board] : 1.0;
+  }
+
+  private function settings() {
+    return $this->configFactory->get('ambey_box_calculator.settings');
   }
 
   /**
@@ -263,6 +298,34 @@ class PricingCalculator {
    * Loads the matching pricing row from the table or config entity fallback.
    */
   private function loadPricingRow(string $shape, string $board, int $quantity): ?array {
+    $storage = $this->entityTypeManager->getStorage('ambey_pricing');
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('shape', $shape)
+      ->condition('board_grade', $board)
+      ->condition('quantity_from', $quantity, '<=')
+      ->condition('quantity_to', $quantity, '>=')
+      ->sort('quantity_from', 'DESC')
+      ->range(0, 1)
+      ->execute();
+    $entities = $storage->loadMultiple($ids);
+    $entity = reset($entities);
+    if ($entity) {
+      return [
+        'shape' => (string) $entity->get('shape'),
+        'board_grade' => (string) $entity->get('board_grade'),
+        'quantity_from' => (int) $entity->get('quantity_from'),
+        'quantity_to' => (int) $entity->get('quantity_to'),
+        'reference_length' => (float) ($entity->get('reference_length') ?: self::REFERENCE_LENGTH),
+        'reference_width' => (float) ($entity->get('reference_width') ?: self::REFERENCE_WIDTH),
+        'reference_height' => (float) ($entity->get('reference_height') ?: self::REFERENCE_HEIGHT),
+        'price_per_box' => (float) $entity->get('price_per_box'),
+        'print_single_cost' => (float) ($entity->get('print_single_cost') ?: 0),
+        'print_multi_cost' => (float) ($entity->get('print_multi_cost') ?: 0),
+        'coating_cost' => (float) ($entity->get('coating_cost') ?: 0),
+      ];
+    }
+
     $query = $this->database->select('ambey_box_pricing', 'p')
       ->fields('p')
       ->condition('shape', $shape)
@@ -274,34 +337,15 @@ class PricingCalculator {
 
     $row = $query->execute()->fetchAssoc();
     if ($row) {
+      $row += [
+        'reference_length' => self::REFERENCE_LENGTH,
+        'reference_width' => self::REFERENCE_WIDTH,
+        'reference_height' => self::REFERENCE_HEIGHT,
+      ];
       return $row;
     }
 
-    $storage = $this->entityTypeManager->getStorage('ambey_pricing');
-    $ids = $storage->getQuery()
-      ->accessCheck(FALSE)
-      ->condition('shape', $shape)
-      ->condition('board_grade', $board)
-      ->condition('quantity_from', $quantity, '<=')
-      ->condition('quantity_to', $quantity, '>=')
-      ->range(0, 1)
-      ->execute();
-    $entities = $storage->loadMultiple($ids);
-    $entity = reset($entities);
-    if (!$entity) {
-      return NULL;
-    }
-
-    return [
-      'shape' => (string) $entity->get('shape'),
-      'board_grade' => (string) $entity->get('board_grade'),
-      'quantity_from' => (int) $entity->get('quantity_from'),
-      'quantity_to' => (int) $entity->get('quantity_to'),
-      'price_per_box' => (float) $entity->get('price_per_box'),
-      'print_single_cost' => 0.0,
-      'print_multi_cost' => 0.0,
-      'coating_cost' => 0.0,
-    ];
+    return NULL;
   }
 
 }

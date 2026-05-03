@@ -1,0 +1,57 @@
+ambey_box_calculator.settings:
+  type: config_object
+  label: 'Ambey box calculator settings'
+  mapping:
+    default_length:
+      type: float
+      label: 'Default length'
+    default_width:
+      type: float
+      label: 'Default width'
+    default_height:
+      type: float
+      label: 'Default height'
+    default_quantity:
+      type: integer
+      label: 'Default quantity'
+    default_board_grade:
+      type: string
+      label: 'Default board grade'
+    default_color:
+      type: string
+      label: 'Default colour'
+    default_shape:
+      type: string
+      label: 'Default shape'
+    default_print:
+      type: string
+      label: 'Default print'
+    default_quality:
+      type: string
+      label: 'Default quality'
+    default_shipping:
+      type: string
+      label: 'Default shipping'
+    gst_rate:
+      type: float
+      label: 'GST rate'
+    price_cache_lifetime:
+      type: integer
+      label: 'Price cache lifetime'
+    single_print_min_quantity:
+      type: integer
+      label: 'Single print minimum quantity'
+    multi_print_min_quantity:
+      type: integer
+      label: 'Multi print minimum quantity'
+    coating_allowed_color:
+      type: string
+      label: 'Coating allowed colour'
+    pdf_logo_path:
+      type: string
+      label: 'PDF logo path'
+    board_grade_factors:
+      type: sequence
+      label: 'Board grade factors'
+      sequence:
+        type: float

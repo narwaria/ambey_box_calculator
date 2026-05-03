@@ -35,10 +35,10 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "enabled"
  *   },
  *   links = {
- *     "collection" = "/admin/config/ambey/shapes",
- *     "add-form" = "/admin/config/ambey/shapes/add",
- *     "edit-form" = "/admin/config/ambey/shapes/{ambey_shape}",
- *     "delete-form" = "/admin/config/ambey/shapes/{ambey_shape}/delete"
+ *     "collection" = "/admin/config/box-calculator/shapes",
+ *     "add-form" = "/admin/config/box-calculator/shapes/add",
+ *     "edit-form" = "/admin/config/box-calculator/shapes/{ambey_shape}",
+ *     "delete-form" = "/admin/config/box-calculator/shapes/{ambey_shape}/delete"
  *   }
  * )
  */

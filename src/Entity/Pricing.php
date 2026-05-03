@@ -34,16 +34,19 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "board_grade",
  *     "quantity_from",
  *     "quantity_to",
+ *     "reference_length",
+ *     "reference_width",
+ *     "reference_height",
  *     "price_per_box",
  *     "print_single_cost",
  *     "print_multi_cost",
  *     "coating_cost"
  *   },
  *   links = {
- *     "collection" = "/admin/config/ambey/pricing",
- *     "add-form" = "/admin/config/ambey/pricing/add",
- *     "edit-form" = "/admin/config/ambey/pricing/{ambey_pricing}",
- *     "delete-form" = "/admin/config/ambey/pricing/{ambey_pricing}/delete"
+ *     "collection" = "/admin/config/box-calculator/pricing",
+ *     "add-form" = "/admin/config/box-calculator/pricing/add",
+ *     "edit-form" = "/admin/config/box-calculator/pricing/{ambey_pricing}",
+ *     "delete-form" = "/admin/config/box-calculator/pricing/{ambey_pricing}/delete"
  *   }
  * )
  */
@@ -54,6 +57,9 @@ class Pricing extends ConfigEntityBase implements PricingInterface {
   public string $board_grade = '';
   public int $quantity_from = 1;
   public int $quantity_to = 999999;
+  public float $reference_length = 10.0;
+  public float $reference_width = 8.0;
+  public float $reference_height = 5.0;
   public float $price_per_box = 0.0;
   public float $print_single_cost = 0.0;
   public float $print_multi_cost = 0.0;

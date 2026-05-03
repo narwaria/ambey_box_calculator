@@ -2,10 +2,16 @@
 
 namespace Drupal\ambey_box_calculator;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+
 /**
  * Validates calculator business rules shared by form and API flows.
  */
 class BusinessRuleValidator {
+
+  public function __construct(
+    protected ConfigFactoryInterface $configFactory,
+  ) {}
 
   /**
    * Validates quote input data.
@@ -32,16 +38,21 @@ class BusinessRuleValidator {
     $quantity = isset($data['quantity']) ? (int) $data['quantity'] : 0;
     $print = $data['print'] ?? $data['print_type'] ?? '';
 
-    if ($print === 'single' && $quantity < 500) {
-      $errors['quantity'] = 'Single colour print requires minimum quantity of 500.';
+    $config = $this->configFactory->get('ambey_box_calculator.settings');
+    $single_min = (int) ($config->get('single_print_min_quantity') ?? 500);
+    $multi_min = (int) ($config->get('multi_print_min_quantity') ?? 3000);
+
+    if ($print === 'single' && $quantity < $single_min) {
+      $errors['quantity'] = 'Single colour print requires minimum quantity of ' . $single_min . '.';
     }
 
-    if ($print === 'multi' && $quantity < 3000) {
-      $errors['quantity'] = 'Multi colour print requires minimum quantity of 3000.';
+    if ($print === 'multi' && $quantity < $multi_min) {
+      $errors['quantity'] = 'Multi colour print requires minimum quantity of ' . $multi_min . '.';
     }
 
-    if (($data['color'] ?? '') === 'brown' && !empty($data['coating'])) {
-      $errors['coating'] = 'Coating is available only for white boxes.';
+    $coating_allowed_color = (string) ($config->get('coating_allowed_color') ?? 'white');
+    if (($data['color'] ?? '') !== $coating_allowed_color && !empty($data['coating'])) {
+      $errors['coating'] = 'Coating is available only for ' . $coating_allowed_color . ' boxes.';
     }
 
     return $errors;

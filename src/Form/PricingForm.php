@@ -15,7 +15,39 @@ class PricingForm extends EntityForm {
     $form['board_grade'] = ['#type' => 'select', '#title' => $this->t('Board Grade'), '#options' => $this->getBoardGradeOptions(), '#default_value' => $entity->get('board_grade') ?: '3ply', '#required' => TRUE];
     $form['quantity_from'] = ['#type' => 'number', '#title' => $this->t('Quantity From'), '#default_value' => $entity->get('quantity_from'), '#min' => 1, '#required' => TRUE];
     $form['quantity_to'] = ['#type' => 'number', '#title' => $this->t('Quantity To'), '#default_value' => $entity->get('quantity_to'), '#min' => 1, '#required' => TRUE];
-    $form['price_per_box'] = ['#type' => 'number', '#title' => $this->t('Price Per Box'), '#step' => 0.01, '#min' => 0, '#default_value' => $entity->get('price_per_box'), '#required' => TRUE];
+    $form['reference_size'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Reference Box Size'),
+      '#description' => $this->t('Set the box size that the Price Per Box is based on. Customer-entered length, width, and height are scaled against this reference size.'),
+    ];
+    $form['reference_size']['reference_length'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Reference Length (L)'),
+      '#step' => 0.1,
+      '#min' => 0.1,
+      '#default_value' => $entity->get('reference_length') ?: 10,
+      '#required' => TRUE,
+      '#parents' => ['reference_length'],
+    ];
+    $form['reference_size']['reference_width'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Reference Width (W)'),
+      '#step' => 0.1,
+      '#min' => 0.1,
+      '#default_value' => $entity->get('reference_width') ?: 8,
+      '#required' => TRUE,
+      '#parents' => ['reference_width'],
+    ];
+    $form['reference_size']['reference_height'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Reference Height (H)'),
+      '#step' => 0.1,
+      '#min' => 0.1,
+      '#default_value' => $entity->get('reference_height') ?: 5,
+      '#required' => TRUE,
+      '#parents' => ['reference_height'],
+    ];
+    $form['price_per_box'] = ['#type' => 'number', '#title' => $this->t('Price Per Box'), '#description' => $this->t('Base price for the reference box size above, before customer size scaling, board material factor, add-ons, shipping, and GST.'), '#step' => 0.01, '#min' => 0, '#default_value' => $entity->get('price_per_box'), '#required' => TRUE];
     return parent::buildForm($form, $form_state);
   }
 
@@ -54,6 +86,11 @@ class PricingForm extends EntityForm {
     parent::validateForm($form, $form_state);
     if ((int) $form_state->getValue('quantity_to') < (int) $form_state->getValue('quantity_from')) {
       $form_state->setErrorByName('quantity_to', $this->t('Quantity To must be greater than or equal to Quantity From.'));
+    }
+    foreach (['reference_length', 'reference_width', 'reference_height'] as $field) {
+      if ((float) $form_state->getValue($field) <= 0) {
+        $form_state->setErrorByName($field, $this->t('Reference size values must be greater than zero.'));
+      }
     }
   }
 

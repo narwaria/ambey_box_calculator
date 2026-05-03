@@ -34,10 +34,10 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "delivery_days"
  *   },
  *   links = {
- *     "collection" = "/admin/config/ambey/shipping",
- *     "add-form" = "/admin/config/ambey/shipping/add",
- *     "edit-form" = "/admin/config/ambey/shipping/{ambey_shipping_zone}",
- *     "delete-form" = "/admin/config/ambey/shipping/{ambey_shipping_zone}/delete"
+ *     "collection" = "/admin/config/box-calculator/shipping",
+ *     "add-form" = "/admin/config/box-calculator/shipping/add",
+ *     "edit-form" = "/admin/config/box-calculator/shipping/{ambey_shipping_zone}",
+ *     "delete-form" = "/admin/config/box-calculator/shipping/{ambey_shipping_zone}/delete"
  *   }
  * )
  */

@@ -14,10 +14,17 @@ ambey_box_calculator.admin_quotes_top:
 
 ambey_box_calculator.settings:
   title: 'Box Calculator'
-  route_name: entity.ambey_pricing.collection
+  route_name: ambey_box_calculator.settings
   parent: system.admin_config
   description: 'Manage box calculator pricing, shapes, shipping, and CRM settings.'
   weight: 20
+
+ambey_box_calculator.global_settings:
+  title: 'Settings'
+  route_name: ambey_box_calculator.settings
+  parent: ambey_box_calculator.settings
+  description: 'Configure calculator defaults and global pricing rules.'
+  weight: -10
 
 ambey_pricing.admin:
   title: 'Box Pricing'

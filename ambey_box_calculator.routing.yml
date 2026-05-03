@@ -35,16 +35,6 @@ ambey_box_calculator.admin_quotes:
   options:
     _admin_route: TRUE
 
-ambey_box_calculator.admin_quotes_legacy:
-  path: '/admin/ambey/quotes'
-  defaults:
-    _controller: '\Drupal\ambey_box_calculator\Controller\AdminQuoteController::dashboard'
-    _title: 'Quote Management Dashboard'
-  requirements:
-    _permission: 'view quotes'
-  options:
-    _admin_route: TRUE
-
 ambey_box_calculator.admin_quotes_export:
   path: '/admin/quotes/export'
   defaults:
@@ -78,12 +68,20 @@ ambey_box_calculator.quote_detail_legacy:
     _admin_route: TRUE
 
 ambey_box_calculator.crm_settings:
-  path: '/admin/config/ambey/crm'
+  path: '/admin/config/box-calculator/crm'
   defaults:
     _form: '\Drupal\ambey_box_calculator\Form\CrmSettingsForm'
     _title: 'CRM Settings'
   requirements:
     _permission: 'manage ambey crm settings'
+
+ambey_box_calculator.settings:
+  path: '/admin/config/box-calculator/settings'
+  defaults:
+    _form: '\Drupal\ambey_box_calculator\Form\CalculatorSettingsForm'
+    _title: 'Box Calculator Settings'
+  requirements:
+    _permission: 'manage ambey calculator settings'
 
 ambey_box_calculator.logs:
   path: '/admin/ambey/logs'

@@ -17,6 +17,9 @@ function ambey_box_calculator_schema() {
       'board_grade' => ['type' => 'varchar', 'length' => 50, 'not null' => TRUE],
       'quantity_from' => ['type' => 'int', 'not null' => TRUE],
       'quantity_to' => ['type' => 'int', 'not null' => TRUE],
+      'reference_length' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE, 'default' => 10],
+      'reference_width' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE, 'default' => 8],
+      'reference_height' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE, 'default' => 5],
       'price_per_box' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE],
       'print_single_cost' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE, 'default' => 0],
       'print_multi_cost' => ['type' => 'numeric', 'precision' => 10, 'scale' => 2, 'not null' => TRUE, 'default' => 0],
@@ -138,6 +141,9 @@ function ambey_box_calculator_install() {
       'board_grade' => $row[1],
       'quantity_from' => $row[2],
       'quantity_to' => $row[3],
+      'reference_length' => 10,
+      'reference_width' => 8,
+      'reference_height' => 5,
       'price_per_box' => $row[4],
       'print_single_cost' => $row[5],
       'print_multi_cost' => $row[6],
@@ -163,6 +169,7 @@ function ambey_box_calculator_grant_administrator_quote_permissions(): void {
     'edit quotes',
     'delete quotes',
     'export quotes',
+    'manage ambey calculator settings',
   ] as $permission) {
     $role->grantPermission($permission);
   }
@@ -298,5 +305,68 @@ function ambey_box_calculator_update_9002() {
  * Grant quote management permissions to administrator role.
  */
 function ambey_box_calculator_update_9003() {
+  ambey_box_calculator_grant_administrator_quote_permissions();
+}
+
+/**
+ * Add reference box dimensions to legacy pricing table rows.
+ */
+function ambey_box_calculator_update_9004() {
+  $schema = \Drupal::database()->schema();
+  $fields = [
+    'reference_length' => 10,
+    'reference_width' => 8,
+    'reference_height' => 5,
+  ];
+
+  foreach ($fields as $field => $default) {
+    if (!$schema->fieldExists('ambey_box_pricing', $field)) {
+      $schema->addField('ambey_box_pricing', $field, [
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 2,
+        'not null' => TRUE,
+        'default' => $default,
+      ]);
+    }
+  }
+}
+
+/**
+ * Create global calculator settings config.
+ */
+function ambey_box_calculator_update_9005() {
+  $config = \Drupal::configFactory()->getEditable('ambey_box_calculator.settings');
+  $defaults = [
+    'default_length' => 10,
+    'default_width' => 8,
+    'default_height' => 5,
+    'default_quantity' => 500,
+    'default_board_grade' => '3ply',
+    'default_color' => 'brown',
+    'default_shape' => 'regular',
+    'default_print' => 'none',
+    'default_quality' => 'standard',
+    'default_shipping' => 'local',
+    'gst_rate' => 0.12,
+    'price_cache_lifetime' => 3600,
+    'single_print_min_quantity' => 500,
+    'multi_print_min_quantity' => 3000,
+    'coating_allowed_color' => 'white',
+    'pdf_logo_path' => '',
+    'board_grade_factors' => [
+      'mono' => 0.75,
+      '3ply' => 1,
+      '5ply' => 1.75,
+      '7ply' => 2.5,
+    ],
+  ];
+
+  foreach ($defaults as $key => $value) {
+    if ($config->get($key) === NULL) {
+      $config->set($key, $value);
+    }
+  }
+  $config->save();
   ambey_box_calculator_grant_administrator_quote_permissions();
 }

@@ -4,6 +4,7 @@ namespace Drupal\Tests\ambey_box_calculator\Unit;
 
 use Drupal\ambey_box_calculator\PricingCalculator;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Tests\UnitTestCase;
@@ -18,7 +19,8 @@ class PricingCalculatorGstTest extends UnitTestCase {
       $this->createMock(Connection::class),
       $this->createMock(CacheBackendInterface::class),
       $this->createMock(EntityTypeManagerInterface::class),
-      $this->createMock(LoggerInterface::class)
+      $this->createMock(LoggerInterface::class),
+      $this->createMock(ConfigFactoryInterface::class)
     );
   }
 
@@ -41,6 +43,7 @@ class PricingCalculatorGstTest extends UnitTestCase {
     $calculator = $this->calculator();
     $this->assertSame(1.0, $calculator->calculateDimensionMultiplier(10, 8, 5));
     $this->assertSame(4.0, $calculator->calculateDimensionMultiplier(20, 16, 10));
+    $this->assertSame(1.0, $calculator->calculateDimensionMultiplier(20, 16, 10, 20, 16, 10));
   }
 
   public function testGetBoardGradeFactor(): void {
