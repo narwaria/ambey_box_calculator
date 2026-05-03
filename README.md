@@ -117,7 +117,7 @@ curl -X POST https://example.com/api/box/quote \
 - Pricing slabs: `/admin/structure/ambey-pricing`
 - Shapes: `/admin/structure/ambey-shapes`
 - Shipping zones: `/admin/structure/ambey-shipping-zones`
-- CRM settings: `/admin/config/services/ambey-crm`
+- CRM settings: `/admin/config/ambey/crm`
 
 ## Verification
 
