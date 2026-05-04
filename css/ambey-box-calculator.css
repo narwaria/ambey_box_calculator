@@ -784,14 +784,27 @@ label[for="edit-coating-emboss"]::after { content: "Raised pattern finishing"; }
     padding: 64px 14px 16px;
   }
 
-  .ambey-calculator legend,
-  .ambey-step-field > label,
   .ambey-step-field > .description,
   .ambey-step-field .fieldset-wrapper > .description,
   .ambey-customer-fields .fieldset-wrapper > .description {
     position: static;
     width: auto;
     max-width: none;
+  }
+
+  .ambey-calculator legend,
+  .ambey-step-field > label {
+    position: absolute;
+    top: 16px;
+    left: 14px;
+    width: calc(100% - 28px);
+    max-width: none;
+  }
+
+  .ambey-calculator .fieldset-legend,
+  .ambey-step-field > label {
+    font-size: 0.95rem;
+    line-height: 1.25;
   }
 
   .ambey-step-field > .description,
