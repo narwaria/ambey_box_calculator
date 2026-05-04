@@ -20,6 +20,7 @@ function ambey_box_calculator_theme() {
     'quote_confirmation' => [
       'variables' => [
         'quote' => [],
+        'download_url' => '',
       ],
       'template' => 'quote-confirmation',
     ],
