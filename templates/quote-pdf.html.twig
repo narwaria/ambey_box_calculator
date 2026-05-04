@@ -3,51 +3,322 @@
 <head>
   <meta charset="utf-8">
   <style>
-    body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #333; }
-    .header { text-align: center; margin-bottom: 20px; }
-    .logo { height: 60px; }
-    .title { font-size: 22px; font-weight: bold; margin-top: 10px; }
-    .section { margin-top: 20px; }
-    table { width: 100%; border-collapse: collapse; }
-    td, th { border: 1px solid #ddd; padding: 8px; }
-    .total { font-weight: bold; font-size: 15px; }
+    @page { margin: 13mm; }
+
+    body {
+      font-family: DejaVu Sans, sans-serif;
+      font-size: 12px;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+    }
+
+    .top-strip {
+      height: 5mm;
+      background: #f97316;
+      margin: -13mm -13mm 10mm -13mm;
+    }
+
+    .header {
+      border: 1px solid #e5e7eb;
+      border-bottom: 3px solid #f97316;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .header-table,
+    .summary-table,
+    .info-table,
+    .spec-table,
+    .price-table,
+    .signature-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .header-table td {
+      border: 0;
+      vertical-align: middle;
+      padding: 0;
+    }
+
+    .logo {
+      max-width: 190px;
+      max-height: 75px;
+    }
+
+    .brand-subtitle {
+      margin-top: 6px;
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .quote-heading {
+      text-align: right;
+    }
+
+    .quote-title {
+      font-size: 28px;
+      line-height: 32px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .quote-subtitle {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .status {
+      margin-top: 5px;
+      font-size: 12px;
+      color: #047857;
+      font-weight: 700;
+    }
+
+    .summary-table {
+      margin-bottom: 12px;
+    }
+
+    .summary-table td {
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 10px 12px;
+      vertical-align: middle;
+    }
+
+    .summary-label {
+      display: block;
+      color: #374151;
+      font-size: 12px;
+    }
+
+    .summary-value {
+      display: block;
+      color: #111827;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 22px;
+    }
+
+    .grand-total-cell {
+      background: #f97316 !important;
+      color: #ffffff !important;
+    }
+
+    .grand-total-cell .summary-label,
+    .grand-total-cell .summary-value {
+      color: #ffffff;
+    }
+
+    .section-title {
+      background: #fff7ed;
+      color: #9a3412;
+      font-size: 16px;
+      line-height: 20px;
+      font-weight: 700;
+      padding: 8px 10px;
+      border: 1px solid #fed7aa;
+      border-left: 4px solid #f97316;
+      margin-top: 10px;
+    }
+
+    .two-column td {
+      width: 50%;
+      vertical-align: top;
+      border: 0;
+      padding: 0 7px 0 0;
+    }
+
+    .two-column td + td {
+      padding: 0 0 0 7px;
+    }
+
+    .info-table td,
+    .spec-table td,
+    .spec-table th,
+    .price-table td,
+    .signature-table td {
+      border: 1px solid #e5e7eb;
+      padding: 9px 10px;
+      vertical-align: middle;
+    }
+
+    .label-cell,
+    .spec-table th {
+      background: #f9fafb;
+      color: #6b7280;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .value-cell {
+      color: #111827;
+    }
+
+    .spec-table th,
+    .spec-table td {
+      width: 20%;
+    }
+
+    .price-table .amount {
+      text-align: right;
+      background: #f9fafb;
+      font-weight: 700;
+    }
+
+    .total-row td {
+      background: #f97316;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      border-color: #f97316;
+    }
+
+    .price-table .total-row .amount {
+      background: #f97316;
+      color: #ffffff;
+    }
+
+    .note-box {
+      margin-top: 12px;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      padding: 10px 12px;
+      line-height: 1.45;
+    }
+
+    .note-title {
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .signature-table {
+      margin-top: 12px;
+    }
+
+    .signature-table td {
+      background: #f9fafb;
+      height: 42px;
+    }
+
+    .footer {
+      margin-top: 22px;
+      padding-top: 8px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+      color: #6b7280;
+      font-size: 10px;
+    }
   </style>
 </head>
 <body>
+  <div class="top-strip"></div>
+
   <div class="header">
-    {% if logo %}<img src="{{ logo }}" class="logo" alt="Logo">{% endif %}
-    <div class="title">Box Quotation</div>
-  </div>
-  <div class="section">
-    <h3>Customer Details</h3>
-    <table>
-      <tr><td>Name</td><td>{{ quote.name }}</td></tr>
-      <tr><td>Email</td><td>{{ quote.email }}</td></tr>
-      <tr><td>Phone</td><td>{{ quote.phone }}</td></tr>
+    <table class="header-table">
+      <tr>
+        <td>
+          {% if logo %}
+            <img src="{{ logo }}" class="logo" alt="Ambey Global Logo">
+          {% endif %}
+          <div class="brand-subtitle">Corrugated Packaging Solutions</div>
+        </td>
+        <td class="quote-heading">
+          <div class="quote-title">Box Quotation</div>
+          <div class="quote-subtitle">Quotation for custom corrugated box requirement</div>
+          <div class="status">Status: Generated Quote</div>
+        </td>
+      </tr>
     </table>
   </div>
-  <div class="section">
-    <h3>Box Details</h3>
-    <table>
-      <tr><td>Shape</td><td>{{ quote.shape }}</td></tr>
-      <tr><td>Board Grade</td><td>{{ quote.board_grade }}</td></tr>
-      <tr><td>Size</td><td>{{ quote.length }} × {{ quote.width }} × {{ quote.height }} inches</td></tr>
-      <tr><td>Colour</td><td>{{ quote.color }}</td></tr>
-      <tr><td>Print</td><td>{{ quote.print_type }}</td></tr>
-      <tr><td>Coating</td><td>{{ quote.coating ?: 'None' }}</td></tr>
-      <tr><td>Shipping Zone</td><td>{{ quote.shipping_zone }}</td></tr>
-      <tr><td>Quantity</td><td>{{ quote.quantity }}</td></tr>
-    </table>
+
+  <table class="summary-table">
+    <tr>
+      <td>
+        <span class="summary-label">Quantity</span>
+        <span class="summary-value">{{ quote.quantity }}</span>
+      </td>
+      <td>
+        <span class="summary-label">Board Grade</span>
+        <span class="summary-value">{{ quote.board_grade }}</span>
+      </td>
+      <td>
+        <span class="summary-label">Final Price / Box</span>
+        <span class="summary-value">₹{{ quote.final_price }}</span>
+      </td>
+      <td class="grand-total-cell">
+        <span class="summary-label">Grand Total</span>
+        <span class="summary-value">₹{{ quote.total_with_gst }}</span>
+      </td>
+    </tr>
+  </table>
+
+  <table class="two-column">
+    <tr>
+      <td>
+        <div class="section-title">Customer Details</div>
+        <table class="info-table">
+          <tr><td class="label-cell">Name</td><td class="value-cell">{{ quote.name }}</td></tr>
+          <tr><td class="label-cell">Email</td><td class="value-cell">{{ quote.email }}</td></tr>
+          <tr><td class="label-cell">Phone</td><td class="value-cell">{{ quote.phone }}</td></tr>
+        </table>
+      </td>
+      <td>
+        <div class="section-title">Quotation Details</div>
+        <table class="info-table">
+          <tr><td class="label-cell">Shape</td><td class="value-cell">{{ quote.shape }}</td></tr>
+          <tr><td class="label-cell">Shipping Zone</td><td class="value-cell">{{ quote.shipping_zone }}</td></tr>
+          <tr><td class="label-cell">Quantity</td><td class="value-cell">{{ quote.quantity }}</td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <div class="section-title">Box Specifications</div>
+  <table class="spec-table">
+    <tr>
+      <th>Shape</th>
+      <th>Size</th>
+      <th>Colour</th>
+      <th>Print</th>
+      <th>Coating</th>
+    </tr>
+    <tr>
+      <td>{{ quote.shape }}</td>
+      <td>{{ quote.length }} × {{ quote.width }} × {{ quote.height }} inches</td>
+      <td>{{ quote.color }}</td>
+      <td>{{ quote.print_type }}</td>
+      <td>{{ quote.coating }}</td>
+    </tr>
+  </table>
+
+  <div class="section-title">Pricing Breakdown</div>
+  <table class="price-table">
+    <tr><td>Box Price Without GST</td><td class="amount">₹{{ quote.base_price }}</td></tr>
+    <tr><td>GST 12% Per Box</td><td class="amount">₹{{ quote.gst }}</td></tr>
+    <tr><td>Final Price Per Box</td><td class="amount">₹{{ quote.final_price }}</td></tr>
+    <tr><td>Total Without GST</td><td class="amount">₹{{ quote.total_without_gst }}</td></tr>
+    <tr class="total-row"><td>Total With GST</td><td class="amount">₹{{ quote.total_with_gst }}</td></tr>
+  </table>
+
+  <div class="note-box">
+    <div class="note-title">Important Notes</div>
+    This quotation is based on the provided box size, board grade, quantity, printing, coating and shipping zone.
+    Final pricing may vary after sample approval, artwork confirmation, material availability, or production changes.
   </div>
-  <div class="section">
-    <h3>Pricing</h3>
-    <table>
-      <tr><td>Box Price Without GST</td><td>₹{{ quote.base_price }}</td></tr>
-      <tr><td>GST (12%) Per Box</td><td>₹{{ quote.gst }}</td></tr>
-      <tr><td>Final Price Per Box</td><td>₹{{ quote.final_price }}</td></tr>
-      <tr><td>Total Without GST</td><td>₹{{ quote.total_without_gst }}</td></tr>
-      <tr class="total"><td>Total With GST</td><td>₹{{ quote.total_with_gst }}</td></tr>
-    </table>
+
+  <table class="signature-table">
+    <tr>
+      <td><strong>Prepared By</strong><br>Ambey Global Sales Team</td>
+      <td><strong>Customer Confirmation</strong><br>Signature / Approval</td>
+    </tr>
+  </table>
+
+  <div class="footer">
+    Ambey Global | Corrugated Box Manufacturing | This quotation is system-generated
   </div>
 </body>
 </html>

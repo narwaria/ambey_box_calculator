@@ -32,8 +32,9 @@ services:
     class: Drupal\ambey_box_calculator\PdfGenerator
     arguments:
       - '@renderer'
-      - '@extension.list.module'
+      - '@extension.list.theme'
       - '@config.factory'
+      - '@entity_type.manager'
 
   ambey_box_calculator.crm:
     class: Drupal\ambey_box_calculator\CrmIntegrationService
